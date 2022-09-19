@@ -20,6 +20,7 @@ object Defines {
   val ALU_SRL       =   7.U(EXE_FUN_LEN)
   val ALU_SRA       =   8.U(EXE_FUN_LEN)
   val ALU_SLT       =   9.U(EXE_FUN_LEN)
+  val ALU_SLTU      =   10.U(EXE_FUN_LEN)
 
 
   // ALU OP1 RELATED

@@ -89,13 +89,15 @@ class Core extends Module {
     (exe_fun === ALU_XOR)     -> (op1_data ^ op2_data),
     (exe_fun === ALU_SLL)     -> (op1_data << op2_data(4, 0)).asUInt,
     (exe_fun === ALU_SRL)     -> (op1_data >> op2_data(4, 0)).asUInt,
-    (exe_fun === ALU_SRA)     -> (op1_data)
+    (exe_fun === ALU_SRA)     -> (op1_data.asSInt >> op2_data(4, 0)).asUInt,
+    (exe_fun === ALU_SLT)     -> (op1_data.asSInt < op2_data.asSInt).asUInt,
+    (exe_fun === ALU_SLTU)    -> (op1_data < op2_data).asUInt
   ))
 
   // Memory Access Stage
   io.wbio.write_en := MuxCase(false.asBool, Seq(
-    (inst === I_LW) -> false.asBool,
-    (inst === S_SW) -> true.asBool
+    (mem_wen === MEN_S) -> false.asBool,
+    (mem_wen === MEN_X) -> true.asBool
   ))
   io.wbio.raddr := alu_out
   // 注意此处，向mem输入的读和写的地址都在此处
@@ -103,7 +105,15 @@ class Core extends Module {
   io.wbio.wdata := rs2_data
 
   //  Writeback (WB) Stage
+  /*
   when(inst === I_LW) {
     registers(wb_addr) := io.wbio.rdata
+  }
+   */
+  val wb_data = MuxCase(alu_out, Seq(
+    (wb_sel === WB_MEM) -> io.wbio.rdata // 将从mem中读到的数据作为要写入的data
+  ))
+  when ((rf_wen == REN_S).asBool){
+    registers(wb_addr) := wb_data
   }
 }
