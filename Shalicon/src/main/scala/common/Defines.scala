@@ -22,7 +22,12 @@ object Defines {
   val ALU_SLT       =   9.U(EXE_FUN_LEN)
   val ALU_SLTU      =   10.U(EXE_FUN_LEN)
   val ALU_JALR      =   11.U(EXE_FUN_LEN)
-
+  val BR_BEQ        =   12.U(EXE_FUN_LEN)
+  val BR_BNE        =   13.U(EXE_FUN_LEN)
+  val BR_BLTU       =   14.U(EXE_FUN_LEN)
+  val BR_BGEU       =   15.U(EXE_FUN_LEN)
+  val BR_BLT        =   16.U(EXE_FUN_LEN)
+  val BR_BGE        =   17.U(EXE_FUN_LEN)
 
   // ALU OP1 RELATED
   val OP1_LEN    =  2.W

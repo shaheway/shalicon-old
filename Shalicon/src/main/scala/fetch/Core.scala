@@ -18,9 +18,12 @@ class Core extends Module {
   io.imem.inst_addr := pc_reg
   val inst = io.imem.inst_o
   val alu_out = Wire(UInt(WORD_LEN_WIDTH))
+  val br_flag = Wire(Bool())
+  val br_target = Wire(UInt(WORD_LEN_WIDTH))
   val pc_next = MuxCase(pc_reg+4.U(32.W), Seq(
     (inst === J_JAL)    -> alu_out,
-    (inst === I_JALR)   -> alu_out
+    (inst === I_JALR)   -> alu_out,
+    (br_flag === true.asBool) -> br_target
   ))
   pc_reg := pc_next
   io.ce := (inst === 0x13136f97.U(WORD_LEN_WIDTH))
@@ -75,7 +78,13 @@ class Core extends Module {
     J_JAL     -> List(ALU_ADD,  OP1_PC, OP2_IM_J, MEN_X, REN_S, WB_PC,  CSR_X),
     U_LUI     -> List(ALU_ADD,  OP1_X,  OP2_IM_U, MEN_X, REN_S, WB_ALU, CSR_X),
     U_AUIPC   -> List(ALU_ADD,  OP1_PC, OP2_IM_U, MEN_X, REN_S, WB_ALU, CSR_X),
-    I_JALR    -> List(ALU_JALR, OP1_PC, OP2_IM_J, MEN_X, REN_S, WB_PC,  CSR_X)
+    I_JALR    -> List(ALU_JALR, OP1_PC, OP2_IM_J, MEN_X, REN_S, WB_PC,  CSR_X),
+    B_BEQ     -> List(BR_BEQ,   OP1_RS, OP2_RS,   MEN_X, REN_X, WB_X,   CSR_X),
+    B_BNE     -> List(BR_BNE,   OP1_RS, OP2_RS,   MEN_X, REN_X, WB_X,   CSR_X),
+    B_BLTU     -> List(BR_BLTU,   OP1_RS, OP2_RS,   MEN_X, REN_X, WB_X,   CSR_X),
+    B_BGEU     -> List(BR_BGEU,   OP1_RS, OP2_RS,   MEN_X, REN_X, WB_X,   CSR_X),
+    B_BLT     -> List(BR_BLT,   OP1_RS, OP2_RS,   MEN_X, REN_X, WB_X,   CSR_X),
+    B_BGE     -> List(BR_BGE,   OP1_RS, OP2_RS,   MEN_X, REN_X, WB_X,   CSR_X)
   ))
   val exe_fun::op1_sel::op2_sel::mem_wen::rf_wen::wb_sel::csr_cmd::Nil = decoded_inst
   val op1_data = MuxCase(0.U(WORD_LEN_WIDTH), Seq(
@@ -106,6 +115,16 @@ class Core extends Module {
     (exe_fun === ALU_SLTU)    -> (op1_data < op2_data).asUInt,
     (exe_fun === ALU_JALR)    -> ((op1_data + op2_data) & inv_one)
   ))
+  br_flag := MuxCase(false.asBool, Seq(
+    (exe_fun === BR_BEQ)   -> (op1_data === op2_data),
+    (exe_fun === BR_BNE)   -> (op1_data =/= op2_data),
+    (exe_fun === BR_BLTU)  -> (op1_data < op2_data),
+    (exe_fun === BR_BLT)   -> (op1_data.asSInt < op2_data.asSInt),
+    (exe_fun === BR_BGEU)  -> (op1_data >= op2_data),
+    (exe_fun === BR_BGE)   -> (op1_data.asSInt >= op2_data.asSInt)
+  ))
+
+  br_target := pc_reg + imm_b_sext
 
   // Memory Access Stage
   io.wbio.write_en := MuxCase(false.asBool, Seq(
