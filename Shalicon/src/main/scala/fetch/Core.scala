@@ -14,9 +14,15 @@ class Core extends Module {
 
   // Instruction Fetch (IF) Stage
   val pc_reg = RegInit(START_ADDR)
-  pc_reg := pc_reg + 4.U(WORD_LEN_WIDTH)
+  // pc_reg := pc_reg + 4.U(WORD_LEN_WIDTH)
   io.imem.inst_addr := pc_reg
   val inst = io.imem.inst_o
+  val alu_out = Wire(UInt(WORD_LEN_WIDTH))
+  val pc_next = MuxCase(pc_reg+4.U(32.W), Seq(
+    (inst === J_JAL)    -> alu_out,
+    (inst === I_JALR)   -> alu_out
+  ))
+  pc_reg := pc_next
   io.ce := (inst === 0x13136f97.U(WORD_LEN_WIDTH))
 
   // Instruction Decode (ID) Stage
@@ -64,7 +70,12 @@ class Core extends Module {
     R_SLT     -> List(ALU_SLT,  OP1_RS, OP2_RS,   MEN_X, REN_S, WB_ALU, CSR_X),
     I_SLTI    -> List(ALU_SLT,  OP1_RS, OP2_IM_I, MEN_X, REN_S, WB_ALU, CSR_X),
     R_SLTU    -> List(ALU_SLT,  OP1_RS, OP2_RS,   MEN_X, REN_S, WB_ALU, CSR_X),
-    I_SLTIU   -> List(ALU_SLT,  OP1_RS, OP2_IM_I, MEN_X, REN_S, WB_ALU, CSR_X)
+    I_SLTIU   -> List(ALU_SLT,  OP1_RS, OP2_IM_I, MEN_X, REN_S, WB_ALU, CSR_X),
+    // 跳转
+    J_JAL     -> List(ALU_ADD,  OP1_PC, OP2_IM_J, MEN_X, REN_S, WB_PC,  CSR_X),
+    U_LUI     -> List(ALU_ADD,  OP1_X,  OP2_IM_U, MEN_X, REN_S, WB_ALU, CSR_X),
+    U_AUIPC   -> List(ALU_ADD,  OP1_PC, OP2_IM_U, MEN_X, REN_S, WB_ALU, CSR_X),
+    I_JALR    -> List(ALU_JALR, OP1_PC, OP2_IM_J, MEN_X, REN_S, WB_PC,  CSR_X)
   ))
   val exe_fun::op1_sel::op2_sel::mem_wen::rf_wen::wb_sel::csr_cmd::Nil = decoded_inst
   val op1_data = MuxCase(0.U(WORD_LEN_WIDTH), Seq(
@@ -81,7 +92,8 @@ class Core extends Module {
   ))
 
   // Excute (EX) Stage
-  val alu_out = MuxCase(0.U(WORD_LEN_WIDTH), Seq(
+  val inv_one = Cat(Fill(WORD_LEN-1, 1.U(1.W)), 0.U(1.U))
+  alu_out := MuxCase(0.U(WORD_LEN_WIDTH), Seq(
     (exe_fun === ALU_ADD)     -> (op1_data + op2_data),
     (exe_fun === ALU_SUB)     -> (op1_data - op2_data),
     (exe_fun === ALU_AND)     -> (op1_data & op2_data),
@@ -91,7 +103,8 @@ class Core extends Module {
     (exe_fun === ALU_SRL)     -> (op1_data >> op2_data(4, 0)).asUInt,
     (exe_fun === ALU_SRA)     -> (op1_data.asSInt >> op2_data(4, 0)).asUInt,
     (exe_fun === ALU_SLT)     -> (op1_data.asSInt < op2_data.asSInt).asUInt,
-    (exe_fun === ALU_SLTU)    -> (op1_data < op2_data).asUInt
+    (exe_fun === ALU_SLTU)    -> (op1_data < op2_data).asUInt,
+    (exe_fun === ALU_JALR)    -> ((op1_data + op2_data) & inv_one)
   ))
 
   // Memory Access Stage
@@ -111,9 +124,10 @@ class Core extends Module {
   }
    */
   val wb_data = MuxCase(alu_out, Seq(
-    (wb_sel === WB_MEM) -> io.wbio.rdata // 将从mem中读到的数据作为要写入的data
+    (wb_sel === WB_MEM) -> io.wbio.rdata, // 将从mem中读到的数据作为要写入的data
+    (wb_sel === WB_PC)  -> (pc_reg + 4.U)
   ))
-  when ((rf_wen == REN_S).asBool){
+  when (rf_wen === REN_S){
     registers(wb_addr) := wb_data
   }
 }
