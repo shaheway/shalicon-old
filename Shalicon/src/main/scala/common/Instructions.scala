@@ -41,6 +41,12 @@ object Instructions {
   val R_AND     =   BitPat("b0000000??????????111?????0110011")
   val I_FENCE   =   BitPat("b0000????????00000000000000001111")
   val I_FENCE_I =   BitPat("b00000000000000000001000000001111")
+  val CSR_RW    =   BitPat("")
+  val CSR_RW_I  =   BitPat("")
+  val CSR_RS    =   BitPat("")
+  val CSR_RS_I  =   BitPat("")
+  val CSR_RC    =   BitPat("")
+  val CSR_RC_I  =   BitPat("")
   // val I_ECALL   =   BitPat("b00000000000000000000000001110011")
   // val I_EBREAK  =   BitPat("b0000????????00000000000000001111")
   /*

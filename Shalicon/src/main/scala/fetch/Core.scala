@@ -11,7 +11,8 @@ class Core extends Module {
     val ce = Output(Bool())
   })
   val registers = Mem(32, UInt(WORD_LEN_WIDTH))
-
+  // Control and Status Registers
+  val csr_register = Mem(4096, UInt(WORD_LEN_WIDTH))
   // Instruction Fetch (IF) Stage
   val pc_reg = RegInit(START_ADDR)
   // pc_reg := pc_reg + 4.U(WORD_LEN_WIDTH)
@@ -81,10 +82,16 @@ class Core extends Module {
     I_JALR    -> List(ALU_JALR, OP1_PC, OP2_IM_J, MEN_X, REN_S, WB_PC,  CSR_X),
     B_BEQ     -> List(BR_BEQ,   OP1_RS, OP2_RS,   MEN_X, REN_X, WB_X,   CSR_X),
     B_BNE     -> List(BR_BNE,   OP1_RS, OP2_RS,   MEN_X, REN_X, WB_X,   CSR_X),
-    B_BLTU     -> List(BR_BLTU,   OP1_RS, OP2_RS,   MEN_X, REN_X, WB_X,   CSR_X),
-    B_BGEU     -> List(BR_BGEU,   OP1_RS, OP2_RS,   MEN_X, REN_X, WB_X,   CSR_X),
+    B_BLTU    -> List(BR_BLTU,   OP1_RS, OP2_RS,   MEN_X, REN_X, WB_X,   CSR_X),
+    B_BGEU    -> List(BR_BGEU,   OP1_RS, OP2_RS,   MEN_X, REN_X, WB_X,   CSR_X),
     B_BLT     -> List(BR_BLT,   OP1_RS, OP2_RS,   MEN_X, REN_X, WB_X,   CSR_X),
-    B_BGE     -> List(BR_BGE,   OP1_RS, OP2_RS,   MEN_X, REN_X, WB_X,   CSR_X)
+    B_BGE     -> List(BR_BGE,   OP1_RS, OP2_RS,   MEN_X, REN_X, WB_X,   CSR_X),
+    CSR_RW    -> List(ALU_NOP_CSR, OP1_RS, OP2_X, MEN_X, REN_S, WB_CSR, CSR_W),
+    CSR_RW_I  -> List(ALU_NOP_CSR, OP1_IM_Z, OP2_X, MEN_X, REN_S, WB_CSR, CSR_W),
+    CSR_RS    -> List(ALU_NOP_CSR, OP1_RS, OP2_X, MEN_X, REN_S, WB_CSR, CSR_S),
+    CSR_RS_I  -> List(ALU_NOP_CSR, OP1_IM_Z, OP2_X, MEN_X, REN_S, WB_CSR, CSR_S),
+    CSR_RC    -> List(ALU_NOP_CSR, OP1_RS, OP2_RS, MEN_X, REN_S, WB_CSR, CSR_C),
+    CSR_RC_I  -> List(ALU_NOP_CSR, OP1_IM_Z, OP2_X, MEN_X, REN_S, WB_CSR, CSR_C)
   ))
   val exe_fun::op1_sel::op2_sel::mem_wen::rf_wen::wb_sel::csr_cmd::Nil = decoded_inst
   val op1_data = MuxCase(0.U(WORD_LEN_WIDTH), Seq(
@@ -113,7 +120,8 @@ class Core extends Module {
     (exe_fun === ALU_SRA)     -> (op1_data.asSInt >> op2_data(4, 0)).asUInt,
     (exe_fun === ALU_SLT)     -> (op1_data.asSInt < op2_data.asSInt).asUInt,
     (exe_fun === ALU_SLTU)    -> (op1_data < op2_data).asUInt,
-    (exe_fun === ALU_JALR)    -> ((op1_data + op2_data) & inv_one)
+    (exe_fun === ALU_JALR)    -> ((op1_data + op2_data) & inv_one),
+    (exe_fun === ALU_NOP_CSR) -> (op1_data)
   ))
   br_flag := MuxCase(false.asBool, Seq(
     (exe_fun === BR_BEQ)   -> (op1_data === op2_data),
