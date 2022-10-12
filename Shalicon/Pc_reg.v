@@ -2,19 +2,21 @@ module Pc_reg(
   input         clock,
   input         reset,
   input  [31:0] io_inst_i,
-  output [31:0] io_inst_addr
+  output [31:0] io_inst_addr,
+  output        io_ce
 );
 `ifdef RANDOMIZE_REG_INIT
   reg [31:0] _RAND_0;
 `endif // RANDOMIZE_REG_INIT
-  reg [31:0] pc_reg; // @[Pc_reg.scala 11:23]
-  wire [31:0] _pc_reg_T_1 = pc_reg + 32'h4; // @[Pc_reg.scala 12:20]
-  assign io_inst_addr = pc_reg; // @[Pc_reg.scala 13:16]
+  reg [31:0] pc_reg; // @[Pc_reg.scala 12:23]
+  wire [31:0] _pc_reg_T_1 = pc_reg + 32'h4; // @[Pc_reg.scala 13:20]
+  assign io_inst_addr = pc_reg; // @[Pc_reg.scala 14:16]
+  assign io_ce = io_inst_i == 32'h13136f97; // @[Pc_reg.scala 16:18]
   always @(posedge clock) begin
-    if (reset) begin // @[Pc_reg.scala 11:23]
-      pc_reg <= 32'h0; // @[Pc_reg.scala 11:23]
+    if (reset) begin // @[Pc_reg.scala 12:23]
+      pc_reg <= 32'h0; // @[Pc_reg.scala 12:23]
     end else begin
-      pc_reg <= _pc_reg_T_1; // @[Pc_reg.scala 12:10]
+      pc_reg <= _pc_reg_T_1; // @[Pc_reg.scala 13:10]
     end
   end
 // Register and memory initialization
