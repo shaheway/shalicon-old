@@ -47,6 +47,7 @@ object Instructions {
   val CSR_RS_I  =   BitPat("")
   val CSR_RC    =   BitPat("")
   val CSR_RC_I  =   BitPat("")
+  val CSR_ECALL =   BitPat("")
   // val I_ECALL   =   BitPat("b00000000000000000000000001110011")
   // val I_EBREAK  =   BitPat("b0000????????00000000000000001111")
   /*

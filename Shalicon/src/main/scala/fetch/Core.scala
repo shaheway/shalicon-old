@@ -24,6 +24,7 @@ class Core extends Module {
   val pc_next = MuxCase(pc_reg+4.U(32.W), Seq(
     (inst === J_JAL)    -> alu_out,
     (inst === I_JALR)   -> alu_out,
+    (inst === CSR_ECALL)-> csr_register(0x305),
     (br_flag === true.asBool) -> br_target
   ))
   pc_reg := pc_next
@@ -109,6 +110,7 @@ class Core extends Module {
 
   // Excute (EX) Stage
   val inv_one = Cat(Fill(WORD_LEN-1, 1.U(1.W)), 0.U(1.U))
+
   alu_out := MuxCase(0.U(WORD_LEN_WIDTH), Seq(
     (exe_fun === ALU_ADD)     -> (op1_data + op2_data),
     (exe_fun === ALU_SUB)     -> (op1_data - op2_data),
@@ -139,7 +141,23 @@ class Core extends Module {
     (mem_wen === MEN_S) -> false.asBool,
     (mem_wen === MEN_X) -> true.asBool
   ))
-  io.wbio.raddr := alu_out
+  io.wbio.raddr := alu_out // 要从mem读数据/指令的地址
+  // CSR: 取数
+  val csr_addr = MuxCase(registers(wb_addr), Seq(
+    (csr_cmd === CSR_E) -> 0x342.U(CSR_REG_LEN)
+  ))
+  val csr_rdata = csr_register(csr_addr)
+  // CSR: 计算
+  val csr_out = MuxCase(csr_rdata, Seq(
+    (csr_cmd === CSR_W) -> alu_out,
+    (csr_cmd === CSR_S) -> (alu_out & csr_rdata),
+    (csr_cmd === CSR_C) -> (alu_out & csr_rdata),
+    (csr_cmd === CSR_E) -> 11.U(WORD_LEN_WIDTH)
+  ))
+  // CSR: 写回CSR寄存器
+  when(csr_cmd > 0.U(CSR_LEN)){
+    csr_register(wb_addr) := csr_out
+  }
   // 注意此处，向mem输入的读和写的地址都在此处
   io.wbio.waddr := alu_out
   io.wbio.wdata := rs2_data
@@ -152,7 +170,8 @@ class Core extends Module {
    */
   val wb_data = MuxCase(alu_out, Seq(
     (wb_sel === WB_MEM) -> io.wbio.rdata, // 将从mem中读到的数据作为要写入的data
-    (wb_sel === WB_PC)  -> (pc_reg + 4.U)
+    (wb_sel === WB_PC)  -> (pc_reg + 4.U),
+    (wb_sel === WB_CSR) -> csr_rdata
   ))
   when (rf_wen === REN_S){
     registers(wb_addr) := wb_data
