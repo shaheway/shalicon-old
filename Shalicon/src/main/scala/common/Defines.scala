@@ -4,9 +4,11 @@ import Instructions._
 object Defines {
   val WORD_LEN = 32;
   val WORD_LEN_WIDTH = 32.W
+  val REG_ADDR_LEN = 5
   val REG_ADDR_WIDTH = 5.W
   val START_ADDR = 0.U(WORD_LEN_WIDTH)
-  val CSR_REG_LEN = 12.W
+  val CSR_REG_LEN = 12
+  val CSR_REG_WIDTH = 12.W
   val BUBBLE = 0x00000013.U(WORD_LEN_WIDTH)  // [ADDI x0,x0,0] = BUBBLE
 
   // ALU INSTRUCTION RELATED
@@ -23,7 +25,7 @@ object Defines {
   val ALU_SLT       =   9.U(EXE_FUN_LEN)
   val ALU_SLTU      =   10.U(EXE_FUN_LEN)
   val ALU_JALR      =   11.U(EXE_FUN_LEN)
-  val ALU_NOP_CSR  =   12.U(EXE_FUN_LEN)
+  val ALU_NOP_CSR   =   12.U(EXE_FUN_LEN)
   val BR_BEQ        =   13.U(EXE_FUN_LEN)
   val BR_BNE        =   14.U(EXE_FUN_LEN)
   val BR_BLTU       =   15.U(EXE_FUN_LEN)
