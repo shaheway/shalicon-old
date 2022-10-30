@@ -3,15 +3,12 @@ import chisel3._
 import chisel3.util._
 import common.Defines._
 import common.Instructions._
-import connect.{InstIO, CsrIO, IfidIO}
+import connect.{InstIO, CsrIO, IfidIO, ExIfIO}
 class InstFetch extends Module {
   val io = IO(new Bundle() {
     val inst_mem = Flipped(new InstIO)
     val csr = Flipped(new CsrIO(CSR_REG_LEN))
-    val br_flag = Input(Bool())
-    val br_target = Input(UInt(WORD_LEN_WIDTH))
-    val jmp_flag = Input(Bool())
-    val alu_out = Input(UInt(WORD_LEN_WIDTH))
+    val exio = Flipped(new ExIfIO)
     val passby = new IfidIO
   })
   // 连接状态寄存器
@@ -23,8 +20,8 @@ class InstFetch extends Module {
   io.inst_mem.inst_addr := if_pc_reg
   val if_inst = io.inst_mem.inst_o
   val pc_next = MuxCase(if_pc_reg + 4.U(WORD_LEN_WIDTH), Seq(
-    io.br_flag -> io.br_target,
-    io.jmp_flag -> io.alu_out,
+    io.exio.br_flag -> io.exio.br_target,
+    io.exio.jmp_flag -> io.exio.alu_out,
     (if_inst === CSR_ECALL) -> ecall_data,
   ))
   if_pc_reg := pc_next
