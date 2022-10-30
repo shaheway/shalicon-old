@@ -1,6 +1,5 @@
 package connect
 import chisel3._
-import chisel3.util._
 import common.Defines._
 class ExIfIO extends Module {
   val alu_out = Output(UInt(WORD_LEN_WIDTH))

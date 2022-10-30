@@ -2,12 +2,13 @@ package Pipline
 import chisel3._
 import chisel3.util._
 import common.Defines._
-import connect.{DecexIO, ExIfIO}
+import connect.{DecexIO, ExIfIO, ExMemIO}
 
 class Execute extends Module {
   val io = IO(new Bundle() {
     val extend = Flipped(new DecexIO)
     val exifIO = new ExIfIO
+    val passby = new ExMemIO
   })
 
   // 定义一组寄存器，将Decode和Excute连起来
@@ -82,4 +83,17 @@ class Execute extends Module {
   io.exifIO.br_flag := br_flag
   io.exifIO.br_target := br_target
   io.exifIO.jmp_flag := jmp_flag
+
+  // 出口连线：连向访存
+  io.passby.exe_pc_reg := ex_pc_reg
+  io.passby.wb_addr := wb_addr_reg
+  io.passby.op1_data := op1_data_reg
+  io.passby.op2_data := op2_data_reg
+  io.passby.mem_wen := mem_wen_reg
+  io.passby.reg_wen := reg_wen_reg
+  io.passby.wb_sel := wb_sel_reg
+  io.passby.csr_addr := csr_addr_reg
+  io.passby.csr_cmd := csr_cmd_reg
+  io.passby.imm_z_uext := imm_z_uext_reg
+  io.passby.alu_out := alu_out
 }
