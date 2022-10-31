@@ -2,12 +2,13 @@ package Pipline
 import chisel3._
 import chisel3.util.MuxCase
 import common.Defines._
-import connect.{CsrIO, ExMemIO, WbIO}
+import connect.{CsrIO, ExMemIO, WbIO, MaWbIO}
 class MemAccess extends Module {
   val io = IO(new Bundle() {
     val extend = Flipped(new ExMemIO)
     val csr = Flipped(new CsrIO(CSR_REG_LEN))
     val wbio = Flipped(new WbIO)
+    val passby = new MaWbIO
   })
 
   // 定义一组寄存器，连接execute与memory access阶段
@@ -63,4 +64,10 @@ class MemAccess extends Module {
     (wb_sel_reg === WB_PC) -> (mem_pc_reg + 4.U(WORD_LEN_WIDTH)),
     (wb_sel_reg === WB_CSR) -> csr_rdata
   ))
+
+  // 连接写回环节
+  io.passby.reg_wb_addr := wb_addr_reg
+  io.passby.reg_wen := reg_wen_reg
+  io.passby.reg_wb_data := mem_wb_data
+
 }
