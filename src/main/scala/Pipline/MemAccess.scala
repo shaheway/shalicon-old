@@ -36,26 +36,31 @@ class MemAccess extends Module {
   imm_z_uext_reg := io.extend.imm_z_uext
   alu_out_reg := io.extend.alu_out
 
+  // 连接访存与memory
   io.wbio.wdata := alu_out_reg
   io.wbio.write_en := mem_wen_reg
   io.wbio.wdata := rs2_data_reg
 
+  // 连接访存与CSR
   // CSR: 取数和写数
-  io.csr.reg_waddr :=
-  val csr_rdata = csr_register(mem_reg_csr_addr)
+  io.csr.reg_raddr := csr_addr_reg
+  io.csr.reg_wdata := csr_wdata
+  val csr_rdata = io.csr.reg_rdata
   val csr_wdata = MuxCase(0.U(WORD_LEN_WIDTH), Seq(
-    (mem_reg_csr_cmd === CSR_W) -> mem_reg_op1_data,
-    (mem_reg_csr_cmd === CSR_S) -> (mem_reg_op1_data | csr_rdata),
-    (mem_reg_csr_cmd === CSR_C) -> ((~mem_reg_op1_data).asUInt & csr_rdata),
-    (mem_reg_csr_cmd === CSR_E) -> 11.U(WORD_LEN_WIDTH)
+    (csr_cmd_reg === CSR_W) -> op1_data_reg,
+    (csr_cmd_reg === CSR_S) -> (op1_data_reg | csr_rdata),
+    (csr_cmd_reg === CSR_C) -> ((~op1_data_reg).asUInt & csr_rdata),
+    (csr_cmd_reg === CSR_E) -> 11.U(WORD_LEN_WIDTH)
   ))
-  when(mem_reg_csr_cmd > 0.U(CSR_LEN)) {
-    csr_register(csr_addr) := csr_wdata
+  when(csr_cmd_reg > 0.U(CSR_LEN)) {
+    io.csr.wen := true.asBool
+  }.otherwise{
+    io.csr.wen := false.asBool
   }
 
-  val mem_wb_data = MuxCase(mem_reg_alu_out, Seq(
-    (mem_reg_wb_sel === WB_MEM) -> io.wbio.rdata, // 将从mem中读到的数据作为要写入的data
-    (mem_reg_wb_sel === WB_PC) -> (mem_reg_pc + 4.U(WORD_LEN_WIDTH)),
-    (mem_reg_wb_sel === WB_CSR) -> csr_rdata
+  val mem_wb_data = MuxCase(alu_out_reg, Seq(
+    (wb_sel_reg === WB_MEM) -> io.wbio.rdata, // 将从mem中读到的数据作为要写入的data
+    (wb_sel_reg === WB_PC) -> (mem_pc_reg + 4.U(WORD_LEN_WIDTH)),
+    (wb_sel_reg === WB_CSR) -> csr_rdata
   ))
 }
