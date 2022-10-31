@@ -16,6 +16,7 @@ class Execute extends Module {
   val exe_fun_reg = RegInit(0.U(EXE_FUN_LEN))
   val op1_data_reg = RegInit(0.U(WORD_LEN_WIDTH))
   val op2_data_reg = RegInit(0.U(WORD_LEN_WIDTH))
+  val rs2_data_reg = RegInit(0.U(WORD_LEN_WIDTH))
   val wb_addr_reg = RegInit(0.U(REG_ADDR_WIDTH))
   val mem_wen_reg = RegInit(0.U(MEN_LEN))
   val reg_wen_reg = RegInit(0.U(REN_LEN))
@@ -33,7 +34,9 @@ class Execute extends Module {
   exe_fun_reg := io.extend.exe_fun
   op1_data_reg := io.extend.op1_data
   op2_data_reg := io.extend.op2_data
+  rs2_data_reg := io.extend.rs2_data
   wb_addr_reg := io.extend.wb_addr
+  wb_sel_reg := io.extend.wb_sel
   mem_wen_reg := io.extend.mem_wen
   reg_wen_reg := io.extend.reg_wen
   csr_addr_reg := io.extend.csr_addr
@@ -88,7 +91,7 @@ class Execute extends Module {
   io.passby.exe_pc_reg := ex_pc_reg
   io.passby.wb_addr := wb_addr_reg
   io.passby.op1_data := op1_data_reg
-  io.passby.op2_data := op2_data_reg
+  io.passby.rs2_data := rs2_data_reg
   io.passby.mem_wen := mem_wen_reg
   io.passby.reg_wen := reg_wen_reg
   io.passby.wb_sel := wb_sel_reg

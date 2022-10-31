@@ -1,9 +1,9 @@
 package Pipline
 import chisel3._
 import common.Defines._
-import connect.RegIO
+import connect.CsrIO
 class CSR extends Module {
-  val csrIO = new RegIO(CSR_REG_LEN)
+  val csrIO = new CsrIO(CSR_REG_LEN)
   // 状态寄存器
   val csr_register = Mem(4096, UInt(WORD_LEN_WIDTH))
   // 读出寄存器中的数
