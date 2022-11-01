@@ -1,7 +1,7 @@
 package connect
 import chisel3._
 import common.Defines._
-class DecexIO extends Module {
+class DecexIO extends Bundle {
   val id_pc_reg = Output(UInt(WORD_LEN_WIDTH))
 
   val imm_i_sext = Output(UInt(WORD_LEN_WIDTH))

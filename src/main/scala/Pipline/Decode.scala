@@ -3,11 +3,11 @@ import chisel3._
 import chisel3.util.{Cat, Fill, ListLookup, MuxCase}
 import common.Defines._
 import common.Instructions._
-import connect.{DecexIO, IfidIO, RegIO}
+import connect.{DecexIO, IfidIO, RegReadIO}
 class Decode extends Module {
   val io = IO(new Bundle() {
     val extend = Flipped(new IfidIO)
-    val regs = Flipped(new RegIO(REG_ADDR_LEN))
+    val regs = Flipped(new RegReadIO(REG_ADDR_LEN))
     val passby = new DecexIO
   })
 

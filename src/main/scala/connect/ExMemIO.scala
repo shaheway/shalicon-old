@@ -1,7 +1,7 @@
 package connect
 import chisel3._
 import common.Defines._
-class ExMemIO extends Module {
+class ExMemIO extends Bundle {
   val exe_pc_reg = Output(UInt(WORD_LEN_WIDTH))
   val wb_addr = Output(UInt(REG_ADDR_WIDTH))
   val op1_data = Output(UInt(WORD_LEN_WIDTH))

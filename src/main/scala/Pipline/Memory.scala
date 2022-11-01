@@ -2,7 +2,6 @@ package Pipline
 import common.Defines._
 import chisel3._
 import chisel3.util._
-import chisel3.stage.ChiselStage
 import chisel3.util.experimental.loadMemoryFromFileInline
 import connect.{InstIO, WbIO}
 class Memory extends Module {
@@ -33,7 +32,8 @@ class Memory extends Module {
     mem(io.wbio.waddr) := io.wbio.wdata(7, 0)
   }
 }
-
+/*
 object Memory extends App {
   (new ChiselStage).emitVerilog(new Memory())
 }
+ */

@@ -1,11 +1,11 @@
 package Pipline
 import chisel3._
 import common.Defines._
-import connect.{MaWbIO, RegIO}
+import connect.{MaWbIO, RegReadIO}
 class WriteBack extends Module {
   val io = IO(new Bundle() {
     val extend = Flipped(new MaWbIO)
-    val regIO = Flipped(new RegIO(32))
+    val regIO = Flipped(new RegReadIO(32))
   })
 
   // 定义本阶段寄存器
