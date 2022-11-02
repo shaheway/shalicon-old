@@ -2,11 +2,12 @@ package Pipline
 import chisel3._
 import chisel3.util.MuxCase
 import common.Defines._
-import connect.{CsrIO, ExMemIO, WbIO, MaWbIO}
+import connect.{CsrReadIO, CsrWriteIO, ExMemIO, MaWbIO, WbIO}
 class MemAccess extends Module {
   val io = IO(new Bundle() {
     val extend = Flipped(new ExMemIO)
-    val csr = Flipped(new CsrIO(CSR_REG_LEN))
+    val csr_read = Flipped(new CsrReadIO(CSR_REG_LEN))
+    val csr_write = Flipped(new CsrWriteIO(CSR_REG_LEN))
     val wbio = Flipped(new WbIO)
     val passby = new MaWbIO
   })
@@ -44,9 +45,10 @@ class MemAccess extends Module {
 
   // 连接访存与CSR
   // CSR: 取数和写数
-  io.csr.reg_raddr := csr_addr_reg
-  io.csr.reg_wdata := csr_wdata
-  val csr_rdata = io.csr.reg_rdata
+  io.csr_read.reg_raddr := csr_addr_reg
+  io.csr_write.reg_wdata := csr_wdata
+  io.csr_write.reg_waddr := csr_addr_reg
+  val csr_rdata = io.csr_read.reg_rdata
   val csr_wdata = MuxCase(0.U(WORD_LEN_WIDTH), Seq(
     (csr_cmd_reg === CSR_W) -> op1_data_reg,
     (csr_cmd_reg === CSR_S) -> (op1_data_reg | csr_rdata),
@@ -54,9 +56,9 @@ class MemAccess extends Module {
     (csr_cmd_reg === CSR_E) -> 11.U(WORD_LEN_WIDTH)
   ))
   when(csr_cmd_reg > 0.U(CSR_LEN)) {
-    io.csr.wen := true.asBool
+    io.csr_write.wen := true.asBool
   }.otherwise{
-    io.csr.wen := false.asBool
+    io.csr_write.wen := false.asBool
   }
 
   val mem_wb_data = MuxCase(alu_out_reg, Seq(

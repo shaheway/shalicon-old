@@ -15,16 +15,24 @@ class Top extends Module {
   // 连接取值阶段与指令内存
   module_inst_fetch.io.inst_mem <> module_memory.io.imem
   // 连接取指阶段与执行阶段：跳转、分支alu_out等
-  module_inst_fetch.io.ex
+  module_inst_fetch.io.exio <> module_execute.io.exifIO
   // 连接取指阶段对CSR的读取
-  module_inst_fetch.io.csr_read <> module_csr.io.readIO
+  module_inst_fetch.io.csr_read <> module_csr.io.read1IO
   // 连接取指阶段与译码阶段
   module_inst_fetch.io.passby <> module_decode.io.extend
   // 连接译码阶段与寄存器
-  module_decode.io.regs <> module_reg.regReadIO
+  module_decode.io.regs <> module_reg.io.regReadIO
   // 连接译码阶段与执行阶段
   module_decode.io.passby <> module_execute.io.extend
-  module_execute.io.passby
+  // 连接执行阶段与访存阶段
+  module_execute.io.passby <> module_memory_access.io.extend
+  // 连接访存与CSR
+  module_memory_access.io.csr_read <> module_csr.io.read2IO
+  module_memory_access.io.csr_write <> module_csr.io.writeIO
+  // 连接访存与写回
+  module_memory_access.io.passby <> module_write_back.io.extend
+  // 连接写回与寄存器文件
+  module_write_back.io.regIO <> module_reg.io.regWriteIO
 }
 
 object Top extends App {

@@ -2,18 +2,18 @@
 [debug] not up to date. inChanged = false, force = false
 [debug] Updating ProjectRef(uri("file:/C:/Users/luoab/Documents/GitHub/shalicon/"), "root")...
 [error] lmcoursier.internal.shaded.coursier.error.FetchError$DownloadingArtifacts: Error fetching artifacts:
-[error] https://repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.4/scalactic_2.13-3.1.4-javadoc.jar: download error: Caught java.net.SocketException (Connection reset) while downloading https://repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.4/scalactic_2.13-3.1.4-javadoc.jar
-[error] https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.18.0/protobuf-java-3.18.0-javadoc.jar: download error: Caught java.net.SocketException (Connection reset) while downloading https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.18.0/protobuf-java-3.18.0-javadoc.jar
+[error] https://repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.4/scalactic_2.13-3.1.4-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.4/scalactic_2.13-3.1.4-javadoc.jar
+[error] https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.18.0/protobuf-java-3.18.0-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.18.0/protobuf-java-3.18.0-javadoc.jar
 [error] https://repo1.maven.org/maven2/edu/berkeley/cs/firrtl_2.13/1.5.3/firrtl_2.13-1.5.3-sources.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/edu/berkeley/cs/firrtl_2.13/1.5.3/firrtl_2.13-1.5.3-sources.jar
 [error] https://repo1.maven.org/maven2/edu/berkeley/cs/chisel3-plugin_2.13.8/3.5.3/chisel3-plugin_2.13.8-3.5.3-sources.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/edu/berkeley/cs/chisel3-plugin_2.13.8/3.5.3/chisel3-plugin_2.13.8-3.5.3-sources.jar
-[error] https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.9.0/jna-5.9.0-javadoc.jar: download error: Caught java.net.SocketException (Connection reset) while downloading https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.9.0/jna-5.9.0-javadoc.jar
-[error] https://repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.8/scala-library-2.13.8-javadoc.jar: download error: Caught java.net.SocketException (Connection reset) while downloading https://repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.8/scala-library-2.13.8-javadoc.jar
-[error] https://repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.4/scalatest_2.13-3.1.4-sources.jar: download error: Caught java.net.SocketException (Connection reset) while downloading https://repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.4/scalatest_2.13-3.1.4-sources.jar
+[error] https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.9.0/jna-5.9.0-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.9.0/jna-5.9.0-javadoc.jar
+[error] https://repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.8/scala-library-2.13.8-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.8/scala-library-2.13.8-javadoc.jar
+[error] https://repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.4/scalatest_2.13-3.1.4-sources.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.4/scalatest_2.13-3.1.4-sources.jar
 [error] https://repo1.maven.org/maven2/org/joda/joda-convert/2.2.0/joda-convert-2.2.0-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/joda/joda-convert/2.2.0/joda-convert-2.2.0-javadoc.jar
 [error] https://repo1.maven.org/maven2/org/portable-scala/portable-scala-reflect_2.13/0.1.1/portable-scala-reflect_2.13-0.1.1-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/portable-scala/portable-scala-reflect_2.13/0.1.1/portable-scala-reflect_2.13-0.1.1-javadoc.jar
 [error] https://repo1.maven.org/maven2/org/scala-sbt/test-interface/1.0/test-interface-1.0-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/scala-sbt/test-interface/1.0/test-interface-1.0-javadoc.jar
 [error] https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.11/commons-lang3-3.11-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.11/commons-lang3-3.11-javadoc.jar
-[error] https://repo1.maven.org/maven2/com/lihaoyi/os-lib_2.13/0.8.0/os-lib_2.13-0.8.0-javadoc.jar: download error: Caught java.net.SocketException (Connection reset) while downloading https://repo1.maven.org/maven2/com/lihaoyi/os-lib_2.13/0.8.0/os-lib_2.13-0.8.0-javadoc.jar
+[error] https://repo1.maven.org/maven2/com/lihaoyi/os-lib_2.13/0.8.0/os-lib_2.13-0.8.0-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/com/lihaoyi/os-lib_2.13/0.8.0/os-lib_2.13-0.8.0-javadoc.jar
 [error] https://repo1.maven.org/maven2/com/github/scopt/scopt_2.13/3.7.1/scopt_2.13-3.7.1-sources.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/com/github/scopt/scopt_2.13/3.7.1/scopt_2.13-3.7.1-sources.jar
 [error] https://repo1.maven.org/maven2/org/apache/commons/commons-text/1.9/commons-text-1.9-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/apache/commons/commons-text/1.9/commons-text-1.9-javadoc.jar
 [error] https://repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.4/scalatest_2.13-3.1.4-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.4/scalatest_2.13-3.1.4-javadoc.jar
@@ -78,7 +78,7 @@
 [error] 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1130)
 [error] 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:630)
 [error] 	at java.base/java.lang.Thread.run(Thread.java:831)
-[error] Caused by: lmcoursier.internal.shaded.coursier.cache.ArtifactError$DownloadError: download error: Caught java.net.SocketException (Connection reset) while downloading https://repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.4/scalactic_2.13-3.1.4-javadoc.jar
+[error] Caused by: lmcoursier.internal.shaded.coursier.cache.ArtifactError$DownloadError: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.4/scalactic_2.13-3.1.4-javadoc.jar
 [error] 	at lmcoursier.internal.shaded.coursier.cache.internal.Downloader$.helper$2(Downloader.scala:748)
 [error] 	at lmcoursier.internal.shaded.coursier.cache.internal.Downloader$.coursier$cache$internal$Downloader$$downloading(Downloader.scala:761)
 [error] 	at lmcoursier.internal.shaded.coursier.cache.internal.Downloader$Blocking$.$anonfun$remote$1(Downloader.scala:406)
@@ -96,30 +96,34 @@
 [error] 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1130)
 [error] 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:630)
 [error] 	at java.base/java.lang.Thread.run(Thread.java:831)
-[error] Caused by: java.net.SocketException: Connection reset
-[error] 	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:323)
-[error] 	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:350)
-[error] 	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:803)
-[error] 	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:976)
-[error] 	at java.base/sun.security.ssl.SSLSocketInputRecord.read(SSLSocketInputRecord.java:478)
-[error] 	at java.base/sun.security.ssl.SSLSocketInputRecord.readFully(SSLSocketInputRecord.java:461)
-[error] 	at java.base/sun.security.ssl.SSLSocketInputRecord.decodeInputRecord(SSLSocketInputRecord.java:243)
-[error] 	at java.base/sun.security.ssl.SSLSocketInputRecord.decode(SSLSocketInputRecord.java:181)
-[error] 	at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:111)
-[error] 	at java.base/sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1509)
-[error] 	at java.base/sun.security.ssl.SSLSocketImpl.readApplicationRecord(SSLSocketImpl.java:1476)
-[error] 	at java.base/sun.security.ssl.SSLSocketImpl$AppInputStream.read(SSLSocketImpl.java:1060)
-[error] 	at java.base/java.io.BufferedInputStream.read1(BufferedInputStream.java:282)
-[error] 	at java.base/java.io.BufferedInputStream.read(BufferedInputStream.java:343)
-[error] 	at java.base/sun.net.www.MeteredStream.read(MeteredStream.java:141)
-[error] 	at java.base/java.io.FilterInputStream.read(FilterInputStream.java:132)
-[error] 	at java.base/sun.net.www.protocol.http.HttpURLConnection$HttpInputStream.read(HttpURLConnection.java:3648)
-[error] 	at java.base/java.io.BufferedInputStream.read1(BufferedInputStream.java:282)
-[error] 	at java.base/java.io.BufferedInputStream.read(BufferedInputStream.java:343)
-[error] 	at java.base/java.io.FilterInputStream.read(FilterInputStream.java:106)
-[error] 	at lmcoursier.internal.shaded.coursier.cache.internal.Downloader$.helper$1(Downloader.scala:689)
-[error] 	at lmcoursier.internal.shaded.coursier.cache.internal.Downloader$.coursier$cache$internal$Downloader$$readFullyTo(Downloader.scala:698)
-[error] 	at lmcoursier.internal.shaded.coursier.cache.internal.Downloader$Blocking$.doDownload(Downloader.scala:270)
+[error] Caused by: java.net.ConnectException: Connection refused: connect
+[error] 	at java.base/sun.nio.ch.Net.connect0(Native Method)
+[error] 	at java.base/sun.nio.ch.Net.connect(Net.java:576)
+[error] 	at java.base/sun.nio.ch.Net.connect(Net.java:565)
+[error] 	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:588)
+[error] 	at java.base/java.net.Socket.connect(Socket.java:645)
+[error] 	at java.base/java.net.Socket.connect(Socket.java:595)
+[error] 	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:182)
+[error] 	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:497)
+[error] 	at java.base/sun.net.www.http.HttpClient$1.run(HttpClient.java:555)
+[error] 	at java.base/sun.net.www.http.HttpClient$1.run(HttpClient.java:553)
+[error] 	at java.base/java.security.AccessController.doPrivileged(AccessController.java:554)
+[error] 	at java.base/sun.net.www.http.HttpClient.privilegedOpenServer(HttpClient.java:552)
+[error] 	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:595)
+[error] 	at java.base/sun.net.www.protocol.https.HttpsClient.<init>(HttpsClient.java:265)
+[error] 	at java.base/sun.net.www.protocol.https.HttpsClient.New(HttpsClient.java:379)
+[error] 	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.getNewHttpClient(AbstractDelegateHttpsURLConnection.java:198)
+[error] 	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:1253)
+[error] 	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:1120)
+[error] 	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:175)
+[error] 	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1653)
+[error] 	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1577)
+[error] 	at java.base/java.net.HttpURLConnection.getResponseCode(HttpURLConnection.java:527)
+[error] 	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getResponseCode(HttpsURLConnectionImpl.java:308)
+[error] 	at lmcoursier.internal.shaded.coursier.cache.CacheUrl$.rangeResOpt(CacheUrl.scala:215)
+[error] 	at lmcoursier.internal.shaded.coursier.cache.CacheUrl$.urlConnectionMaybePartial(CacheUrl.scala:338)
+[error] 	at lmcoursier.internal.shaded.coursier.cache.ConnectionBuilder.connectionMaybePartial(ConnectionBuilder.scala:50)
+[error] 	at lmcoursier.internal.shaded.coursier.cache.internal.Downloader$Blocking$.doDownload(Downloader.scala:220)
 [error] 	at lmcoursier.internal.shaded.coursier.cache.internal.Downloader$Blocking$.$anonfun$remote$2(Downloader.scala:406)
 [error] 	at lmcoursier.internal.shaded.coursier.cache.internal.Downloader$.$anonfun$downloading$1(Downloader.scala:715)
 [error] 	at lmcoursier.internal.shaded.coursier.cache.CacheLocks$.withUrlLock(CacheLocks.scala:114)
@@ -141,18 +145,18 @@
 [error] 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:630)
 [error] 	at java.base/java.lang.Thread.run(Thread.java:831)
 [error] (updateClassifiers) lmcoursier.internal.shaded.coursier.error.FetchError$DownloadingArtifacts: Error fetching artifacts:
-[error] https://repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.4/scalactic_2.13-3.1.4-javadoc.jar: download error: Caught java.net.SocketException (Connection reset) while downloading https://repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.4/scalactic_2.13-3.1.4-javadoc.jar
-[error] https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.18.0/protobuf-java-3.18.0-javadoc.jar: download error: Caught java.net.SocketException (Connection reset) while downloading https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.18.0/protobuf-java-3.18.0-javadoc.jar
+[error] https://repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.4/scalactic_2.13-3.1.4-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.4/scalactic_2.13-3.1.4-javadoc.jar
+[error] https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.18.0/protobuf-java-3.18.0-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.18.0/protobuf-java-3.18.0-javadoc.jar
 [error] https://repo1.maven.org/maven2/edu/berkeley/cs/firrtl_2.13/1.5.3/firrtl_2.13-1.5.3-sources.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/edu/berkeley/cs/firrtl_2.13/1.5.3/firrtl_2.13-1.5.3-sources.jar
 [error] https://repo1.maven.org/maven2/edu/berkeley/cs/chisel3-plugin_2.13.8/3.5.3/chisel3-plugin_2.13.8-3.5.3-sources.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/edu/berkeley/cs/chisel3-plugin_2.13.8/3.5.3/chisel3-plugin_2.13.8-3.5.3-sources.jar
-[error] https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.9.0/jna-5.9.0-javadoc.jar: download error: Caught java.net.SocketException (Connection reset) while downloading https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.9.0/jna-5.9.0-javadoc.jar
-[error] https://repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.8/scala-library-2.13.8-javadoc.jar: download error: Caught java.net.SocketException (Connection reset) while downloading https://repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.8/scala-library-2.13.8-javadoc.jar
-[error] https://repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.4/scalatest_2.13-3.1.4-sources.jar: download error: Caught java.net.SocketException (Connection reset) while downloading https://repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.4/scalatest_2.13-3.1.4-sources.jar
+[error] https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.9.0/jna-5.9.0-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.9.0/jna-5.9.0-javadoc.jar
+[error] https://repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.8/scala-library-2.13.8-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.8/scala-library-2.13.8-javadoc.jar
+[error] https://repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.4/scalatest_2.13-3.1.4-sources.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.4/scalatest_2.13-3.1.4-sources.jar
 [error] https://repo1.maven.org/maven2/org/joda/joda-convert/2.2.0/joda-convert-2.2.0-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/joda/joda-convert/2.2.0/joda-convert-2.2.0-javadoc.jar
 [error] https://repo1.maven.org/maven2/org/portable-scala/portable-scala-reflect_2.13/0.1.1/portable-scala-reflect_2.13-0.1.1-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/portable-scala/portable-scala-reflect_2.13/0.1.1/portable-scala-reflect_2.13-0.1.1-javadoc.jar
 [error] https://repo1.maven.org/maven2/org/scala-sbt/test-interface/1.0/test-interface-1.0-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/scala-sbt/test-interface/1.0/test-interface-1.0-javadoc.jar
 [error] https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.11/commons-lang3-3.11-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.11/commons-lang3-3.11-javadoc.jar
-[error] https://repo1.maven.org/maven2/com/lihaoyi/os-lib_2.13/0.8.0/os-lib_2.13-0.8.0-javadoc.jar: download error: Caught java.net.SocketException (Connection reset) while downloading https://repo1.maven.org/maven2/com/lihaoyi/os-lib_2.13/0.8.0/os-lib_2.13-0.8.0-javadoc.jar
+[error] https://repo1.maven.org/maven2/com/lihaoyi/os-lib_2.13/0.8.0/os-lib_2.13-0.8.0-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/com/lihaoyi/os-lib_2.13/0.8.0/os-lib_2.13-0.8.0-javadoc.jar
 [error] https://repo1.maven.org/maven2/com/github/scopt/scopt_2.13/3.7.1/scopt_2.13-3.7.1-sources.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/com/github/scopt/scopt_2.13/3.7.1/scopt_2.13-3.7.1-sources.jar
 [error] https://repo1.maven.org/maven2/org/apache/commons/commons-text/1.9/commons-text-1.9-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/apache/commons/commons-text/1.9/commons-text-1.9-javadoc.jar
 [error] https://repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.4/scalatest_2.13-3.1.4-javadoc.jar: download error: Caught java.net.ConnectException (Connection refused: connect) while downloading https://repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.4/scalatest_2.13-3.1.4-javadoc.jar
