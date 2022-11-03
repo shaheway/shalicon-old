@@ -2,28 +2,29 @@ package Pipline
 import chisel3._
 import chisel3.util.MuxCase
 import common.Defines._
-import connect.{CsrReadIO, CsrWriteIO, ExMemIO, MaWbIO, WbIO}
+import connect.{CsrReadIO, CsrWriteIO, ExMemIO, MaWbIO, MemWriteIO, MemReadIO}
 class MemAccess extends Module {
   val io = IO(new Bundle() {
     val extend = Flipped(new ExMemIO)
     val csr_read = Flipped(new CsrReadIO(CSR_REG_LEN))
     val csr_write = Flipped(new CsrWriteIO(CSR_REG_LEN))
-    val wbio = Flipped(new WbIO)
+    val mem_write = Flipped(new MemWriteIO)
+    val mem_read = Flipped(new MemReadIO)
     val passby = new MaWbIO
   })
 
   // 定义一组寄存器，连接execute与memory access阶段
   val mem_pc_reg = RegInit(0.U(WORD_LEN_WIDTH))
   val wb_addr_reg = RegInit(0.U(REG_ADDR_WIDTH))
-  val op1_data_reg = RegInit(UInt(WORD_LEN_WIDTH))
-  val rs2_data_reg = RegInit(UInt(WORD_LEN_WIDTH))
-  val mem_wen_reg = RegInit(UInt(MEN_LEN))
-  val reg_wen_reg = RegInit(UInt(REN_LEN))
-  val wb_sel_reg = RegInit(UInt(WB_SEL_LEN))
-  val csr_addr_reg = RegInit(UInt(CSR_REG_WIDTH))
-  val csr_cmd_reg = RegInit(UInt(CSR_LEN))
-  val imm_z_uext_reg = RegInit(UInt(WORD_LEN_WIDTH))
-  val alu_out_reg = RegInit(UInt(WORD_LEN_WIDTH))
+  val op1_data_reg = RegInit(0.U(WORD_LEN_WIDTH))
+  val rs2_data_reg = RegInit(0.U(WORD_LEN_WIDTH))
+  val mem_wen_reg = RegInit(0.U(MEN_LEN))
+  val reg_wen_reg = RegInit(0.U(REN_LEN))
+  val wb_sel_reg = RegInit(0.U(WB_SEL_LEN))
+  val csr_addr_reg = RegInit(0.U(CSR_REG_WIDTH))
+  val csr_cmd_reg = RegInit(0.U(CSR_LEN))
+  val imm_z_uext_reg = RegInit(0.U(WORD_LEN_WIDTH))
+  val alu_out_reg = RegInit(0.U(WORD_LEN_WIDTH))
 
   mem_pc_reg := io.extend.exe_pc_reg
   wb_addr_reg := io.extend.wb_addr
@@ -39,17 +40,18 @@ class MemAccess extends Module {
   alu_out_reg := io.extend.alu_out
 
   // 连接访存与memory
-  io.wbio.wdata := alu_out_reg
-  io.wbio.write_en := mem_wen_reg
-  io.wbio.wdata := rs2_data_reg
+  io.mem_write.waddr := alu_out_reg
+  io.mem_write.write_en := mem_wen_reg
+  io.mem_write.wdata := rs2_data_reg
+  io.mem_read.raddr := alu_out_reg
 
   // 连接访存与CSR
   // CSR: 取数和写数
   io.csr_read.reg_raddr := csr_addr_reg
-  io.csr_write.reg_wdata := csr_wdata
+  // io.csr_write.reg_wdata := csr_wdata
   io.csr_write.reg_waddr := csr_addr_reg
   val csr_rdata = io.csr_read.reg_rdata
-  val csr_wdata = MuxCase(0.U(WORD_LEN_WIDTH), Seq(
+  io.csr_write.reg_wdata := MuxCase(0.U(WORD_LEN_WIDTH), Seq(
     (csr_cmd_reg === CSR_W) -> op1_data_reg,
     (csr_cmd_reg === CSR_S) -> (op1_data_reg | csr_rdata),
     (csr_cmd_reg === CSR_C) -> ((~op1_data_reg).asUInt & csr_rdata),
@@ -62,7 +64,7 @@ class MemAccess extends Module {
   }
 
   val mem_wb_data = MuxCase(alu_out_reg, Seq(
-    (wb_sel_reg === WB_MEM) -> io.wbio.rdata, // 将从mem中读到的数据作为要写入的data
+    (wb_sel_reg === WB_MEM) -> io.mem_read.rdata, // 将从mem中读到的数据作为要写入的data
     (wb_sel_reg === WB_PC) -> (mem_pc_reg + 4.U(WORD_LEN_WIDTH)),
     (wb_sel_reg === WB_CSR) -> csr_rdata
   ))

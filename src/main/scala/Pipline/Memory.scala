@@ -3,11 +3,12 @@ import common.Defines._
 import chisel3._
 import chisel3.util._
 import chisel3.util.experimental.loadMemoryFromFileInline
-import connect.{InstIO, WbIO}
+import connect.{InstIO, MemReadIO, MemWriteIO}
 class Memory extends Module {
   val io = IO(new Bundle() {
     val imem = (new InstIO)
-    val wbio = (new WbIO)
+    val aread = (new MemReadIO)
+    val awrite = (new MemWriteIO)
   })
   val mem = Mem(16384, UInt(8.W))
   loadMemoryFromFileInline(mem, "memoryFile.hex")
@@ -20,16 +21,16 @@ class Memory extends Module {
       mem(io.imem.inst_addr))
   }
 
-  io.wbio.rdata := Cat(mem(io.wbio.raddr + 3.U(8.W)),
-    mem(io.wbio.raddr + 2.U(8.W)),
-    mem(io.wbio.raddr + 1.U(8.W)),
-    mem(io.wbio.raddr))
+  io.aread.rdata := Cat(mem(io.aread.raddr + 3.U(8.W)),
+    mem(io.aread.raddr + 2.U(8.W)),
+    mem(io.aread.raddr + 1.U(8.W)),
+    mem(io.aread.raddr))
 
-  when(io.wbio.write_en){
-    mem(io.wbio.waddr + 3.U(8.W)) := io.wbio.wdata(31, 24)
-    mem(io.wbio.waddr + 2.U(8.W)) := io.wbio.wdata(23, 16)
-    mem(io.wbio.waddr + 1.U(8.W)) := io.wbio.wdata(15, 8)
-    mem(io.wbio.waddr) := io.wbio.wdata(7, 0)
+  when(io.awrite.write_en){
+    mem(io.awrite.waddr + 3.U(8.W)) := io.awrite.wdata(31, 24)
+    mem(io.awrite.waddr + 2.U(8.W)) := io.awrite.wdata(23, 16)
+    mem(io.awrite.waddr + 1.U(8.W)) := io.awrite.wdata(15, 8)
+    mem(io.awrite.waddr) := io.awrite.wdata(7, 0)
   }
 }
 /*

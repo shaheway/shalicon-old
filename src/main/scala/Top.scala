@@ -1,16 +1,22 @@
 import Pipline.{CSR, Decode, Execute, InstFetch, MemAccess, Memory, Regs, WriteBack}
 import chisel3._
-import chisel3.stage.ChiselStage
+import chiseltest._
+import org.scalatest.flatspec.AnyFlatSpec
+import common.Defines._
+import firrtl.Utils.True
 class Top extends Module {
-  val module_inst_fetch = new InstFetch
-  val module_decode = new Decode
-  val module_execute = new Execute
-  val module_memory_access = new MemAccess
-  val module_write_back = new WriteBack
+  val io = IO(new Bundle() {
+    val gp = Output(UInt(WORD_LEN_WIDTH)) // 测试用
+  })
+  val module_inst_fetch = Module(new InstFetch)
+  val module_decode = Module(new Decode)
+  val module_execute = Module(new Execute)
+  val module_memory_access = Module(new MemAccess)
+  val module_write_back = Module(new WriteBack)
 
-  val module_reg = new Regs
-  val module_csr = new CSR
-  val module_memory = new Memory
+  val module_reg = Module(new Regs)
+  val module_csr = Module(new CSR)
+  val module_memory = Module(new Memory)
 
   // 连接取值阶段与指令内存
   module_inst_fetch.io.inst_mem <> module_memory.io.imem
@@ -29,12 +35,30 @@ class Top extends Module {
   // 连接访存与CSR
   module_memory_access.io.csr_read <> module_csr.io.read2IO
   module_memory_access.io.csr_write <> module_csr.io.writeIO
+  // 连接访存与内存
+  module_memory_access.io.mem_write <> module_memory.io.awrite
+  module_memory_access.io.mem_read <> module_memory.io.aread
   // 连接访存与写回
   module_memory_access.io.passby <> module_write_back.io.extend
   // 连接写回与寄存器文件
   module_write_back.io.regIO <> module_reg.io.regWriteIO
+  //测试用
+  io.gp := module_write_back.io.gp
 }
 
+/*
 object Top extends App {
   (new ChiselStage).emitVerilog(new Top())
+}
+ */
+
+class TestBench extends AnyFlatSpec with ChiselScalatestTester{
+  "mycpu" should "work through hex" in {
+    test(new Top) { c =>
+      while (true) {
+        c.clock.step(1)
+        println(p"alu_out = 0x${Hexadecimal(c.io.gp)}\n")
+      }
+    }
+  }
 }
