@@ -1,12 +1,13 @@
 import Pipline.{CSR, Decode, Execute, InstFetch, MemAccess, Memory, Regs, WriteBack}
 import chisel3._
 import chiseltest._
-import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest._
 import common.Defines._
 import firrtl.Utils.True
 class Top extends Module {
   val io = IO(new Bundle() {
-    val gp = Output(UInt(WORD_LEN_WIDTH)) // 测试用
+    val probe = Output(UInt(WORD_LEN_WIDTH)) // 测试用
+    val exit = Output(Bool())
   })
   val module_inst_fetch = Module(new InstFetch)
   val module_decode = Module(new Decode)
@@ -43,7 +44,20 @@ class Top extends Module {
   // 连接写回与寄存器文件
   module_write_back.io.regIO <> module_reg.io.regWriteIO
   //测试用
-  io.gp := module_write_back.io.gp
+  // IO & Debug
+  io.probe := module_reg.io.probe
+  io.exit := (module_inst_fetch.if_inst === UNIMP)
+  printf(p"if_reg_pc        : 0x${Hexadecimal(module_inst_fetch.io.passby.if_pc_reg)}\n")
+  printf(p"id_reg_pc        : 0x${Hexadecimal(module_decode.io.passby.id_pc_reg)}\n")
+  // printf(p"id_reg_inst      : 0x${Hexadecimal(module_decode.io.passby.)}\n")
+  printf(p"exe_reg_pc       : 0x${Hexadecimal(module_execute.io.passby.exe_pc_reg)}\n")
+  printf(p"exe_reg_op1_data : 0x${Hexadecimal(module_execute.io.passby.op1_data)}\n")
+  printf(p"exe_reg_rs2_data : 0x${Hexadecimal(module_execute.io.passby.rs2_data)}\n")
+  printf(p"exe_alu_out      : 0x${Hexadecimal(module_execute.io.passby.alu_out)}\n")
+  // printf(p"mem_reg_pc       : 0x${Hexadecimal(module_execute.io.passby.mem_pc_reg)}\n")
+  printf(p"reg_wb_data      : 0x${Hexadecimal(module_memory_access.io.passby.reg_wb_data)}\n")
+  printf(p"register at position 6: 0x${Hexadecimal(io.probe)}\n")
+  printf("---------\n")
 }
 
 /*
@@ -52,12 +66,11 @@ object Top extends App {
 }
  */
 
-class TestBench extends AnyFlatSpec with ChiselScalatestTester{
+class HexTest extends FlatSpec with ChiselScalatestTester {
   "mycpu" should "work through hex" in {
     test(new Top) { c =>
-      while (true) {
+      for (i <- 1 to 36){
         c.clock.step(1)
-        println(p"alu_out = 0x${Hexadecimal(c.io.gp)}\n")
       }
     }
   }

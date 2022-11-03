@@ -10,6 +10,7 @@ object Defines {
   val CSR_REG_LEN = 12
   val CSR_REG_WIDTH = 12.W
   val BUBBLE = 0x00000013.U(WORD_LEN_WIDTH)  // [ADDI x0,x0,0] = BUBBLE
+  val UNIMP         = "x_c0001073".U(WORD_LEN.W)
 
   // ALU INSTRUCTION RELATED
   val EXE_FUN_LEN = 5.W

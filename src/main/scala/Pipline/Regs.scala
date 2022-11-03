@@ -6,6 +6,7 @@ class Regs extends Module {
   val io = IO(new Bundle() {
     val regReadIO = new RegReadIO(REG_ADDR_LEN)
     val regWriteIO = new RegWriteIO(REG_ADDR_LEN)
+    val probe = Output(UInt(WORD_LEN_WIDTH)) // 测试用
   })
 
   // 通用寄存器
@@ -17,4 +18,6 @@ class Regs extends Module {
   when(io.regWriteIO.wen){
     registers(io.regWriteIO.reg_waddr) := io.regWriteIO.reg_wdata
   }
+
+  io.probe := registers(6)
 }
