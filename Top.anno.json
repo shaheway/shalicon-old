@@ -12,5 +12,12 @@
     "target":"~Top|Memory>mem",
     "filename":"memoryFile.hex",
     "hexOrBinary":"h"
+  },
+  {
+    "class":"firrtl.transforms.CombinationalPath",
+    "sink":"~Top|Top>io_exit",
+    "sources":[
+      "~Top|Top>reset"
+    ]
   }
 ]

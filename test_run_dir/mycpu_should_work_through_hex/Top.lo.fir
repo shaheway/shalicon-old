@@ -802,7 +802,7 @@ circuit Top :
     input io_regWriteIO_reg_waddr : UInt<5>
     input io_regWriteIO_reg_wdata : UInt<32>
     input io_regWriteIO_wen : UInt<1>
-    output io_gp : UInt<32>
+    output io_probe : UInt<32>
 
     mem registers : @[Regs.scala 13:22]
       data-type => UInt<32>
@@ -811,7 +811,7 @@ circuit Top :
       write-latency => 1
       reader => io_regReadIO_reg_rdata1_MPORT
       reader => io_regReadIO_reg_rdata2_MPORT
-      reader => io_gp_MPORT
+      reader => io_probe_MPORT
       writer => MPORT
       read-under-write => undefined
     node _GEN_0 = validif(io_regWriteIO_wen, io_regWriteIO_reg_waddr) @[Regs.scala 18:26 19:14]
@@ -821,16 +821,16 @@ circuit Top :
     node _GEN_4 = validif(io_regWriteIO_wen, io_regWriteIO_reg_wdata) @[Regs.scala 18:26 19:40]
     io_regReadIO_reg_rdata1 <= registers.io_regReadIO_reg_rdata1_MPORT.data @[Regs.scala 15:27]
     io_regReadIO_reg_rdata2 <= registers.io_regReadIO_reg_rdata2_MPORT.data @[Regs.scala 16:27]
-    io_gp <= registers.io_gp_MPORT.data @[Regs.scala 22:9]
+    io_probe <= registers.io_probe_MPORT.data @[Regs.scala 22:12]
     registers.io_regReadIO_reg_rdata1_MPORT.addr <= io_regReadIO_reg_raddr1 @[Regs.scala 15:39]
     registers.io_regReadIO_reg_rdata1_MPORT.en <= UInt<1>("h1") @[Regs.scala 15:39]
     registers.io_regReadIO_reg_rdata1_MPORT.clk <= clock @[Regs.scala 15:39]
     registers.io_regReadIO_reg_rdata2_MPORT.addr <= io_regReadIO_reg_raddr2 @[Regs.scala 16:39]
     registers.io_regReadIO_reg_rdata2_MPORT.en <= UInt<1>("h1") @[Regs.scala 16:39]
     registers.io_regReadIO_reg_rdata2_MPORT.clk <= clock @[Regs.scala 16:39]
-    registers.io_gp_MPORT.addr <= UInt<5>("h6") @[Regs.scala 22:21]
-    registers.io_gp_MPORT.en <= UInt<1>("h1") @[Regs.scala 22:21]
-    registers.io_gp_MPORT.clk <= clock @[Regs.scala 22:21]
+    registers.io_probe_MPORT.addr <= UInt<5>("h6") @[Regs.scala 22:24]
+    registers.io_probe_MPORT.en <= UInt<1>("h1") @[Regs.scala 22:24]
+    registers.io_probe_MPORT.clk <= clock @[Regs.scala 22:24]
     registers.MPORT.addr <= _GEN_0
     registers.MPORT.en <= _GEN_2
     registers.MPORT.clk <= _GEN_1
@@ -1014,7 +1014,7 @@ circuit Top :
   module Top :
     input clock : Clock
     input reset : UInt<1>
-    output io_gp : UInt<32>
+    output io_probe : UInt<32>
     output io_exit : UInt<1>
 
     inst module_inst_fetch of InstFetch @[Top.scala 12:33]
@@ -1044,7 +1044,7 @@ circuit Top :
     node _T_15 = eq(_T_14, UInt<1>("h0")) @[Top.scala 59:9]
     node _T_16 = bits(reset, 0, 0) @[Top.scala 60:9]
     node _T_17 = eq(_T_16, UInt<1>("h0")) @[Top.scala 60:9]
-    io_gp <= module_reg.io_gp @[Top.scala 48:9]
+    io_probe <= module_reg.io_probe @[Top.scala 48:12]
     io_exit <= _io_exit_T @[Top.scala 49:11]
     module_inst_fetch.clock <= clock
     module_inst_fetch.reset <= reset
@@ -1126,5 +1126,5 @@ circuit Top :
     printf(clock, and(and(UInt<1>("h1"), _T_9), UInt<1>("h1")), "exe_reg_rs2_data : 0x%x\n", module_execute.io_passby_rs2_data) : printf_4 @[Top.scala 55:9]
     printf(clock, and(and(UInt<1>("h1"), _T_11), UInt<1>("h1")), "exe_alu_out      : 0x%x\n", module_execute.io_passby_alu_out) : printf_5 @[Top.scala 56:9]
     printf(clock, and(and(UInt<1>("h1"), _T_13), UInt<1>("h1")), "reg_wb_data      : 0x%x\n", module_memory_access.io_passby_reg_wb_data) : printf_6 @[Top.scala 58:9]
-    printf(clock, and(and(UInt<1>("h1"), _T_15), UInt<1>("h1")), "register at position 6: 0x%x\n", io_gp) : printf_7 @[Top.scala 59:9]
+    printf(clock, and(and(UInt<1>("h1"), _T_15), UInt<1>("h1")), "register at position 6: 0x%x\n", io_probe) : printf_7 @[Top.scala 59:9]
     printf(clock, and(and(UInt<1>("h1"), _T_17), UInt<1>("h1")), "---------\n") : printf_8 @[Top.scala 60:9]

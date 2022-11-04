@@ -1,9 +1,9 @@
 import Pipline.{CSR, Decode, Execute, InstFetch, MemAccess, Memory, Regs, WriteBack}
 import chisel3._
+import chisel3.stage.ChiselStage
 import chiseltest._
 import org.scalatest._
 import common.Defines._
-import firrtl.Utils.True
 class Top extends Module {
   val io = IO(new Bundle() {
     val probe = Output(UInt(WORD_LEN_WIDTH)) // 测试用
@@ -60,11 +60,11 @@ class Top extends Module {
   printf("---------\n")
 }
 
-/*
+
 object Top extends App {
   (new ChiselStage).emitVerilog(new Top())
 }
- */
+
 
 class HexTest extends FlatSpec with ChiselScalatestTester {
   "mycpu" should "work through hex" in {

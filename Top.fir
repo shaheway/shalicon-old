@@ -715,16 +715,18 @@ circuit Top :
   module Regs :
     input clock : Clock
     input reset : Reset
-    output io : { regReadIO : { flip reg_raddr1 : UInt<5>, flip reg_raddr2 : UInt<5>, reg_rdata1 : UInt<32>, reg_rdata2 : UInt<32>}, regWriteIO : { flip reg_waddr : UInt<5>, flip reg_wdata : UInt<32>, flip wen : UInt<1>}}
+    output io : { regReadIO : { flip reg_raddr1 : UInt<5>, flip reg_raddr2 : UInt<5>, reg_rdata1 : UInt<32>, reg_rdata2 : UInt<32>}, regWriteIO : { flip reg_waddr : UInt<5>, flip reg_wdata : UInt<32>, flip wen : UInt<1>}, probe : UInt<32>}
 
-    cmem registers : UInt<32> [32] @[Regs.scala 12:22]
-    infer mport io_regReadIO_reg_rdata1_MPORT = registers[io.regReadIO.reg_raddr1], clock @[Regs.scala 14:39]
-    io.regReadIO.reg_rdata1 <= io_regReadIO_reg_rdata1_MPORT @[Regs.scala 14:27]
-    infer mport io_regReadIO_reg_rdata2_MPORT = registers[io.regReadIO.reg_raddr2], clock @[Regs.scala 15:39]
-    io.regReadIO.reg_rdata2 <= io_regReadIO_reg_rdata2_MPORT @[Regs.scala 15:27]
-    when io.regWriteIO.wen : @[Regs.scala 17:26]
-      infer mport MPORT = registers[io.regWriteIO.reg_waddr], clock @[Regs.scala 18:14]
-      MPORT <= io.regWriteIO.reg_wdata @[Regs.scala 18:40]
+    cmem registers : UInt<32> [32] @[Regs.scala 13:22]
+    infer mport io_regReadIO_reg_rdata1_MPORT = registers[io.regReadIO.reg_raddr1], clock @[Regs.scala 15:39]
+    io.regReadIO.reg_rdata1 <= io_regReadIO_reg_rdata1_MPORT @[Regs.scala 15:27]
+    infer mport io_regReadIO_reg_rdata2_MPORT = registers[io.regReadIO.reg_raddr2], clock @[Regs.scala 16:39]
+    io.regReadIO.reg_rdata2 <= io_regReadIO_reg_rdata2_MPORT @[Regs.scala 16:27]
+    when io.regWriteIO.wen : @[Regs.scala 18:26]
+      infer mport MPORT = registers[io.regWriteIO.reg_waddr], clock @[Regs.scala 19:14]
+      MPORT <= io.regWriteIO.reg_wdata @[Regs.scala 19:40]
+    infer mport io_probe_MPORT = registers[UInt<3>("h6")], clock @[Regs.scala 22:24]
+    io.probe <= io_probe_MPORT @[Regs.scala 22:12]
 
   module CSR :
     input clock : Clock
@@ -813,50 +815,88 @@ circuit Top :
   module Top :
     input clock : Clock
     input reset : UInt<1>
-    output io : { gp : UInt<32>}
+    output io : { probe : UInt<32>, exit : UInt<1>}
 
-    inst module_inst_fetch of InstFetch @[Top.scala 9:33]
+    inst module_inst_fetch of InstFetch @[Top.scala 12:33]
     module_inst_fetch.clock <= clock
     module_inst_fetch.reset <= reset
-    inst module_decode of Decode @[Top.scala 10:29]
+    inst module_decode of Decode @[Top.scala 13:29]
     module_decode.clock <= clock
     module_decode.reset <= reset
-    inst module_execute of Execute @[Top.scala 11:30]
+    inst module_execute of Execute @[Top.scala 14:30]
     module_execute.clock <= clock
     module_execute.reset <= reset
-    inst module_memory_access of MemAccess @[Top.scala 12:36]
+    inst module_memory_access of MemAccess @[Top.scala 15:36]
     module_memory_access.clock <= clock
     module_memory_access.reset <= reset
-    inst module_write_back of WriteBack @[Top.scala 13:33]
+    inst module_write_back of WriteBack @[Top.scala 16:33]
     module_write_back.clock <= clock
     module_write_back.reset <= reset
-    inst module_reg of Regs @[Top.scala 15:26]
+    inst module_reg of Regs @[Top.scala 18:26]
     module_reg.clock <= clock
     module_reg.reset <= reset
-    inst module_csr of CSR @[Top.scala 16:26]
+    inst module_csr of CSR @[Top.scala 19:26]
     module_csr.clock <= clock
     module_csr.reset <= reset
-    inst module_memory of Memory @[Top.scala 17:29]
+    inst module_memory of Memory @[Top.scala 20:29]
     module_memory.clock <= clock
     module_memory.reset <= reset
-    module_inst_fetch.io.inst_mem <= module_memory.io.imem @[Top.scala 20:33]
-    module_inst_fetch.io.exio <= module_execute.io.exifIO @[Top.scala 22:29]
-    module_inst_fetch.io.csr_read <= module_csr.io.read1IO @[Top.scala 24:33]
-    module_decode.io.extend <= module_inst_fetch.io.passby @[Top.scala 26:31]
-    module_decode.io.regs <= module_reg.io.regReadIO @[Top.scala 28:25]
-    module_execute.io.extend <= module_decode.io.passby @[Top.scala 30:27]
-    module_memory_access.io.extend <= module_execute.io.passby @[Top.scala 32:28]
-    module_memory_access.io.csr_read <= module_csr.io.read2IO @[Top.scala 34:36]
-    module_csr.io.writeIO.wen <= module_memory_access.io.csr_write.wen @[Top.scala 35:37]
-    module_csr.io.writeIO.reg_wdata <= module_memory_access.io.csr_write.reg_wdata @[Top.scala 35:37]
-    module_csr.io.writeIO.reg_waddr <= module_memory_access.io.csr_write.reg_waddr @[Top.scala 35:37]
-    module_memory.io.awrite.write_en <= module_memory_access.io.mem_write.write_en @[Top.scala 37:37]
-    module_memory.io.awrite.wdata <= module_memory_access.io.mem_write.wdata @[Top.scala 37:37]
-    module_memory.io.awrite.waddr <= module_memory_access.io.mem_write.waddr @[Top.scala 37:37]
-    module_memory_access.io.mem_read <= module_memory.io.aread @[Top.scala 38:36]
-    module_write_back.io.extend <= module_memory_access.io.passby @[Top.scala 40:34]
-    module_reg.io.regWriteIO.wen <= module_write_back.io.regIO.wen @[Top.scala 42:30]
-    module_reg.io.regWriteIO.reg_wdata <= module_write_back.io.regIO.reg_wdata @[Top.scala 42:30]
-    module_reg.io.regWriteIO.reg_waddr <= module_write_back.io.regIO.reg_waddr @[Top.scala 42:30]
-    io.gp <= module_write_back.io.gp @[Top.scala 44:9]
+    module_inst_fetch.io.inst_mem <= module_memory.io.imem @[Top.scala 23:33]
+    module_inst_fetch.io.exio <= module_execute.io.exifIO @[Top.scala 25:29]
+    module_inst_fetch.io.csr_read <= module_csr.io.read1IO @[Top.scala 27:33]
+    module_decode.io.extend <= module_inst_fetch.io.passby @[Top.scala 29:31]
+    module_decode.io.regs <= module_reg.io.regReadIO @[Top.scala 31:25]
+    module_execute.io.extend <= module_decode.io.passby @[Top.scala 33:27]
+    module_memory_access.io.extend <= module_execute.io.passby @[Top.scala 35:28]
+    module_memory_access.io.csr_read <= module_csr.io.read2IO @[Top.scala 37:36]
+    module_csr.io.writeIO.wen <= module_memory_access.io.csr_write.wen @[Top.scala 38:37]
+    module_csr.io.writeIO.reg_wdata <= module_memory_access.io.csr_write.reg_wdata @[Top.scala 38:37]
+    module_csr.io.writeIO.reg_waddr <= module_memory_access.io.csr_write.reg_waddr @[Top.scala 38:37]
+    module_memory.io.awrite.write_en <= module_memory_access.io.mem_write.write_en @[Top.scala 40:37]
+    module_memory.io.awrite.wdata <= module_memory_access.io.mem_write.wdata @[Top.scala 40:37]
+    module_memory.io.awrite.waddr <= module_memory_access.io.mem_write.waddr @[Top.scala 40:37]
+    module_memory_access.io.mem_read <= module_memory.io.aread @[Top.scala 41:36]
+    module_write_back.io.extend <= module_memory_access.io.passby @[Top.scala 43:34]
+    module_reg.io.regWriteIO.wen <= module_write_back.io.regIO.wen @[Top.scala 45:30]
+    module_reg.io.regWriteIO.reg_wdata <= module_write_back.io.regIO.reg_wdata @[Top.scala 45:30]
+    module_reg.io.regWriteIO.reg_waddr <= module_write_back.io.regIO.reg_waddr @[Top.scala 45:30]
+    io.probe <= module_reg.io.probe @[Top.scala 48:12]
+    node _io_exit_T = eq(module_inst_fetch.io.inst_mem.inst_o, UInt<32>("hc0001073")) @[Top.scala 49:41]
+    io.exit <= _io_exit_T @[Top.scala 49:11]
+    node _T = bits(reset, 0, 0) @[Top.scala 50:9]
+    node _T_1 = eq(_T, UInt<1>("h0")) @[Top.scala 50:9]
+    when _T_1 : @[Top.scala 50:9]
+      printf(clock, UInt<1>("h1"), "if_reg_pc        : 0x%x\n", module_inst_fetch.io.passby.if_pc_reg) : printf @[Top.scala 50:9]
+    node _T_2 = bits(reset, 0, 0) @[Top.scala 51:9]
+    node _T_3 = eq(_T_2, UInt<1>("h0")) @[Top.scala 51:9]
+    when _T_3 : @[Top.scala 51:9]
+      printf(clock, UInt<1>("h1"), "id_reg_pc        : 0x%x\n", module_decode.io.passby.id_pc_reg) : printf_1 @[Top.scala 51:9]
+    node _T_4 = bits(reset, 0, 0) @[Top.scala 53:9]
+    node _T_5 = eq(_T_4, UInt<1>("h0")) @[Top.scala 53:9]
+    when _T_5 : @[Top.scala 53:9]
+      printf(clock, UInt<1>("h1"), "exe_reg_pc       : 0x%x\n", module_execute.io.passby.exe_pc_reg) : printf_2 @[Top.scala 53:9]
+    node _T_6 = bits(reset, 0, 0) @[Top.scala 54:9]
+    node _T_7 = eq(_T_6, UInt<1>("h0")) @[Top.scala 54:9]
+    when _T_7 : @[Top.scala 54:9]
+      printf(clock, UInt<1>("h1"), "exe_reg_op1_data : 0x%x\n", module_execute.io.passby.op1_data) : printf_3 @[Top.scala 54:9]
+    node _T_8 = bits(reset, 0, 0) @[Top.scala 55:9]
+    node _T_9 = eq(_T_8, UInt<1>("h0")) @[Top.scala 55:9]
+    when _T_9 : @[Top.scala 55:9]
+      printf(clock, UInt<1>("h1"), "exe_reg_rs2_data : 0x%x\n", module_execute.io.passby.rs2_data) : printf_4 @[Top.scala 55:9]
+    node _T_10 = bits(reset, 0, 0) @[Top.scala 56:9]
+    node _T_11 = eq(_T_10, UInt<1>("h0")) @[Top.scala 56:9]
+    when _T_11 : @[Top.scala 56:9]
+      printf(clock, UInt<1>("h1"), "exe_alu_out      : 0x%x\n", module_execute.io.passby.alu_out) : printf_5 @[Top.scala 56:9]
+    node _T_12 = bits(reset, 0, 0) @[Top.scala 58:9]
+    node _T_13 = eq(_T_12, UInt<1>("h0")) @[Top.scala 58:9]
+    when _T_13 : @[Top.scala 58:9]
+      printf(clock, UInt<1>("h1"), "reg_wb_data      : 0x%x\n", module_memory_access.io.passby.reg_wb_data) : printf_6 @[Top.scala 58:9]
+    node _T_14 = bits(reset, 0, 0) @[Top.scala 59:9]
+    node _T_15 = eq(_T_14, UInt<1>("h0")) @[Top.scala 59:9]
+    when _T_15 : @[Top.scala 59:9]
+      printf(clock, UInt<1>("h1"), "register at position 6: 0x%x\n", io.probe) : printf_7 @[Top.scala 59:9]
+    node _T_16 = bits(reset, 0, 0) @[Top.scala 60:9]
+    node _T_17 = eq(_T_16, UInt<1>("h0")) @[Top.scala 60:9]
+    when _T_17 : @[Top.scala 60:9]
+      printf(clock, UInt<1>("h1"), "---------\n") : printf_8 @[Top.scala 60:9]
 
