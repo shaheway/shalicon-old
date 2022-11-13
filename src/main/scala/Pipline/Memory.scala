@@ -18,7 +18,7 @@ class Memory extends Module {
     io.imem.inst_o := Cat(mem(io.imem.inst_addr + 3.U(8.W)),
       mem(io.imem.inst_addr + 2.U(8.W)),
       mem(io.imem.inst_addr + 1.U(8.W)),
-      mem(io.imem.inst_addr))
+      mem(io.imem.inst_addr)) // 小端法机器
   }
 
   io.aread.rdata := Cat(mem(io.aread.raddr + 3.U(8.W)),
