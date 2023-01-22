@@ -1,6 +1,6 @@
 package peripheral.memory
 import chisel3._
-import core.common.Defines
+import common.Defines
 
 class RAMBundle extends Bundle{
   val memAccessAddr = Input(UInt(Defines.dataAddrWidth))

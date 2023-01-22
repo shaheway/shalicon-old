@@ -1,7 +1,7 @@
 package peripheral.timer
 import chisel3._
 import chisel3.util.MuxLookup
-import core.common.Defines
+import common.Defines
 import peripheral.memory.RAMBundle
 
 class Timer extends Module {

@@ -1,7 +1,7 @@
 package core.hazard
 import chisel3._
 import chisel3.util.MuxCase
-import core.common.Defines
+import common.Defines
 
 class Forward extends Module {
   val io = IO(new Bundle() {

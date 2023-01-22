@@ -1,7 +1,8 @@
 package core.writeback
 
 import chisel3._
-import core.common.Defines
+import common.Defines
+
 class WriteBack extends Module{
   val io = IO(new Bundle() {
     val regWriteEnable_in = Input(Bool())

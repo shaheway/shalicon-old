@@ -1,8 +1,8 @@
 package core.regs
 import chisel3._
 import chisel3.util.MuxLookup
+import common.Defines
 import core.clint.PrivilegedCSRBundle
-import core.common.Defines
 
 class CSRFile extends Module {
   val io = IO(new Bundle() {

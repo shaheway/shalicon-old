@@ -1,13 +1,13 @@
 package core.decode
 import chisel3._
 import chisel3.util.{Cat, Fill, MuxLookup, MuxCase}
+import common.Defines
 import core.alu.AluopType
-import core.common.Defines
 
 class Decode extends Module {
   val io = IO(new Bundle() {
     val instruction = Input(UInt(Defines.instructionWidth))
-    val progCounter = Input(UInt(Defines.instAddrWidth))
+    val instructionAddress = Input(UInt(Defines.instAddrWidth))
 
     val interruptAssert = Input(Bool())
     val interruptHandlerAddr = Input(UInt(Defines.instAddrWidth))
@@ -17,16 +17,17 @@ class Decode extends Module {
     val reg1Addr = Output(UInt(Defines.regAddrWidth))
     val reg2Addr = Output(UInt(Defines.regAddrWidth))
 
-    val csrReadData = Input(UInt(Defines.dataWidth))
+    val csrReadData = Input(UInt(Defines.dataWidth)) // from csr register
     val csrReadAddr = Output(UInt(Defines.csrAddrWidth))
-    val csrWriteEnable = Output(UInt(Defines.dataWidth))
 
     val jumpFlag = Output(Bool())
     val jumpTarget = Output(UInt(Defines.instAddrWidth))
-    val out2ex = new DecodeOut
+
+    val clintJumpAddress = Output(Bool())
+    val out2ex = new DecodeOutBundle
   })
 
-  val progCounter = io.progCounter
+  val progCounter = io.instructionAddress
   val instruction = io.instruction
   val opcode = instruction(6, 0)
   val rd = instruction(11, 7)
@@ -39,6 +40,7 @@ class Decode extends Module {
   val imm_b = Cat(Fill(52, instruction(31)), instruction(7), instruction(30, 25), instruction(11, 8), 0.U(1.W))
   val imm_u = Cat(Fill(32, instruction(31)), instruction(31, 12), 0.U(12.W))
   val imm_j = Cat(Fill(32, instruction(31)), instruction(31), instruction(19, 12), instruction(20), instruction(30, 21), 0.U(1.W))
+  val imm_z = Cat(0.U(59.W), instruction(19, 15))
 
   io.reg1Addr := rs1
   io.reg2Addr := rs2
@@ -56,6 +58,7 @@ class Decode extends Module {
       InstructionType.auipc -> imm_u,
       InstructionType.jal -> imm_j,
       InstructionType.jalr -> imm_j,
+      InstructionType.csr -> imm_z
     )
   )
   // _Todo: If data hazard happens, aluop1 should be forwarded with new values._
@@ -65,15 +68,14 @@ class Decode extends Module {
     IndexedSeq(
       InstructionType.auipc -> progCounter,
       InstructionType.jal -> progCounter,
-      InstructionType.B -> progCounter
+      InstructionType.B -> progCounter,
+      InstructionType.csr -> Mux(funct3 === CSRTypeFunct3.csrrci || funct3 === CSRTypeFunct3.csrrsi || funct3 === CSRTypeFunct3.csrrwi, immediate, reg1Data)
     )
   )
   io.out2ex.op1Data := aluop1
   // _Todo: If data hazard happens, aluop2 should be forwarded with new values._
   val aluop2 = Mux(opcode === InstructionType.R || opcode === InstructionType.RW, reg2Data, immediate)
   io.out2ex.op2Data := aluop2
-  // Todo: If data hazard happens, io.reg1Data should be forwarded with new values.
-  val jumpTargetAddr = Mux(io.interruptAssert, io.interruptHandlerAddr, immediate + Mux(opcode === InstructionType.jal, progCounter, io.reg1Data))
 
   io.out2ex.regWriteSource := MuxLookup(
     opcode,
@@ -117,7 +119,8 @@ class Decode extends Module {
   io.out2ex.regWriteDest := rd
 
   io.csrReadAddr := instruction(31, 20)
-  io.csrWriteEnable := Mux(opcode === InstructionType.csr, MuxLookup(
+  io.out2ex.csrReadData := io.csrReadData
+  io.out2ex.csrWriteEnable := Mux(opcode === InstructionType.csr, MuxLookup(
     funct3,
     false.asBool,
     IndexedSeq(
@@ -129,23 +132,6 @@ class Decode extends Module {
       CSRTypeFunct3.csrrwi -> true.asBool
     )
   ), false.asBool)
-
-  // todo: support interrupt and csr memory page
-  io.jumpFlag := (io.interruptAssert || opcode === InstructionType.jal || opcode === InstructionType.jalr || (opcode === InstructionType.B && MuxLookup(
-    funct3,
-    false.asBool,
-    IndexedSeq(
-      BtypeFunct3.beq -> (reg1Data === reg2Data),
-      BtypeFunct3.bne -> (reg1Data =/= reg2Data),
-      BtypeFunct3.blt -> (reg1Data.asSInt < reg2Data.asSInt),
-      BtypeFunct3.bge -> (reg1Data.asSInt >= reg2Data.asSInt),
-      BtypeFunct3.bltu -> (reg1Data < reg2Data),
-      BtypeFunct3.bgeu -> (reg1Data >= reg2Data)
-    )
-  )))
-
-  // todo: support interrupt and csr memory page
-  io.jumpTarget := jumpTargetAddr
 
   io.out2ex.opType := MuxLookup(
     opcode,
@@ -204,5 +190,26 @@ class Decode extends Module {
   io.out2ex.allowForward1 := Mux(opcode === InstructionType.R || opcode === InstructionType.I || opcode === InstructionType.S || opcode === InstructionType.B || opcode === InstructionType.IW || opcode === InstructionType.RW || opcode === InstructionType.L, true.asBool, false.asBool)
   io.out2ex.allowForward2 := Mux(opcode === InstructionType.R || opcode === InstructionType.RW || opcode === InstructionType.S || opcode === InstructionType.B, true.asBool, false.asBool)
 
+  // Control related
+  // todo: support interrupt and csr memory page
+  io.jumpFlag := (io.interruptAssert || opcode === InstructionType.jal || opcode === InstructionType.jalr || (opcode === InstructionType.B && MuxLookup(
+    funct3,
+    false.asBool,
+    IndexedSeq(
+      BtypeFunct3.beq -> (reg1Data === reg2Data),
+      BtypeFunct3.bne -> (reg1Data =/= reg2Data),
+      BtypeFunct3.blt -> (reg1Data.asSInt < reg2Data.asSInt),
+      BtypeFunct3.bge -> (reg1Data.asSInt >= reg2Data.asSInt),
+      BtypeFunct3.bltu -> (reg1Data < reg2Data),
+      BtypeFunct3.bgeu -> (reg1Data >= reg2Data)
+    )
+  )))
 
+  // Todo: If data hazard happens, io.reg1Data should be forwarded with new values.
+  val jumpTargetAddr = Mux(io.interruptAssert, io.interruptHandlerAddr, immediate + Mux(opcode === InstructionType.jal, progCounter, io.reg1Data))
+  // todo: support interrupt and csr memory page
+  io.jumpTarget := jumpTargetAddr
+
+  // clint
+  io.clintJumpAddress := immediate + Mux(opcode === InstructionType.jal, progCounter, io.reg1Data)
 }

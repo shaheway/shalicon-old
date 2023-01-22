@@ -1,6 +1,6 @@
 package core.regs
 import chisel3._
-import core.common.Defines
+import common.Defines
 
 object IndexedCSR {
   val mstatus = 0x300.U(Defines.csrAddrWidth)

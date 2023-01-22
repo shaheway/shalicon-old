@@ -1,6 +1,7 @@
 package core.clint
 import chisel3._
-import core.common.Defines
+import common.Defines
+
 class PrivilegedCSRBundle extends Bundle {
   val mstatus = Input(UInt(Defines.dataWidth))
   val mepc = Input(UInt(Defines.dataWidth))

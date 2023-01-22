@@ -1,4 +1,5 @@
-package core.common
+package common
+
 import chisel3._
 object Defines {
   val instAddrWidth = 64.W
@@ -9,4 +10,5 @@ object Defines {
   val regAddrWidth = 5.W
   val csrAddrWidth = 12.W
   val aluopTypeWidth = 5.W
+  val entryPC = 0x10000.U(instAddrWidth)
 }

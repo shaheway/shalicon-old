@@ -1,6 +1,7 @@
 package core.alu
 import chisel3._
-import core.common.Defines
+import common.Defines
+
 object AluopType {
   val nop = 0x0.U(Defines.aluopTypeWidth)
   val add = 0x1.U(Defines.aluopTypeWidth)

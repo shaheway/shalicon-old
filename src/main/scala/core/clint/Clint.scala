@@ -1,7 +1,7 @@
 package core.clint
 import chisel3._
 import chisel3.util.{Cat, MuxLookup}
-import core.common.Defines
+import common.Defines
 import core.decode.PrivilegedISA
 
 class Clint extends Module {
