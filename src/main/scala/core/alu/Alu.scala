@@ -3,6 +3,7 @@ import chisel3._
 import chisel3.util.{Cat, Fill, MuxLookup}
 import common.Defines
 import core.decode.DecodeOutBundle
+import core.hazard.HazardType
 
 class Alu extends Module {
   val io = IO(new Bundle() {
@@ -20,12 +21,24 @@ class Alu extends Module {
 //    val regWriteDest_in = Input(UInt(Defines.regAddrWidth))
 //    val csrAddr_in = Input(UInt(Defines.csrAddrWidth))
 //    val csrWriteEnable_in = Input(UInt(Defines.dataWidth))
-    val rs2Data = Input(UInt(Defines.dataWidth)) // from register
+//    val rs2Data = Input(UInt(Defines.dataWidth)) // from register
+    val op1ForwardType = Input(Bool())
+    val op2ForwardType = Input(Bool())
+    val opnFromMem = Input(UInt(Defines.dataWidth))
+    val opnFromWb = Input(UInt(Defines.dataWidth))
     val in = Flipped(new DecodeOutBundle)
     val out = new AluOutBundle
   })
-  val op1Data = io.in.op1Data
-  val op2Data = io.in.op2Data
+
+  val op1Data = Mux(io.in.allowForward1, MuxLookup(io.op1ForwardType, io.in.op1Data, IndexedSeq(
+    HazardType.ForwardFromMem -> io.opnFromMem,
+    HazardType.ForwardFromWb -> io.opnFromWb
+  )), io.in.op1Data)
+  val op2Data = Mux(io.in.allowForward2, MuxLookup(io.op2ForwardType, io.in.op2Data, IndexedSeq(
+    HazardType.ForwardFromMem -> io.opnFromMem,
+    HazardType.ForwardFromWb -> io.opnFromWb
+  )), io.in.op2Data)
+
   val wops = MuxLookup(io.in.opType, 0.U(Defines.wordWidth), IndexedSeq(
     AluopType.addw -> (op1Data(31, 0) + op2Data(31, 0)),
     AluopType.subw -> (op1Data(31, 0) - op2Data(31, 0)),
@@ -62,5 +75,10 @@ class Alu extends Module {
   io.out.regWriteDest := io.in.regWriteDest
   io.out.csrWriteEnable := io.in.csrWriteEnable
   io.out.aluResult := aluResult
-  io.out.rs2Data := io.rs2Data
+  io.out.rs2Data := Mux(io.in.allowForwardrs2, MuxLookup(io.in.rs2Addr, io.in.rs2Data, IndexedSeq(
+    HazardType.ForwardFromMem -> io.opnFromMem,
+    HazardType.ForwardFromWb -> io.opnFromWb
+  )), io.in.rs2Data) // solved: forward
+  io.out.csrType := io.in.csrType
+  io.out.csrWriteDest := io.in.csrWriteDest
 }

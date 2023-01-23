@@ -118,8 +118,11 @@ class Decode extends Module {
 
   io.out2ex.regWriteDest := rd
 
-  io.csrReadAddr := instruction(31, 20)
+  val csrAddress = instruction(31, 20)
+  io.csrReadAddr := csrAddress
+  io.out2ex.csrWriteDest := csrAddress
   io.out2ex.csrReadData := io.csrReadData
+  io.out2ex.csrType := funct3
   io.out2ex.csrWriteEnable := Mux(opcode === InstructionType.csr, MuxLookup(
     funct3,
     false.asBool,
@@ -184,11 +187,13 @@ class Decode extends Module {
   )
 
   io.out2ex.rs2Addr := rs2
+  io.out2ex.rs1Addr := rs1
+  io.out2ex.allowForward1 := Mux(opcode === InstructionType.R || opcode === InstructionType.I || opcode === InstructionType.S || opcode === InstructionType.B || opcode === InstructionType.IW || opcode === InstructionType.RW || opcode === InstructionType.L, true.asBool, false.asBool)
+  io.out2ex.allowForward2 := Mux(opcode === InstructionType.R || opcode === InstructionType.RW || opcode === InstructionType.B, true.asBool, false.asBool)
+  io.out2ex.allowForwardrs2 := (opcode === InstructionType.S)
 
   io.out2ex.memReadType := Mux(opcode === InstructionType.L, funct3, 0x7.U(3.W))
   io.out2ex.memWriteType := Mux(opcode === InstructionType.S, funct3, 0x7.U(3.W))
-  io.out2ex.allowForward1 := Mux(opcode === InstructionType.R || opcode === InstructionType.I || opcode === InstructionType.S || opcode === InstructionType.B || opcode === InstructionType.IW || opcode === InstructionType.RW || opcode === InstructionType.L, true.asBool, false.asBool)
-  io.out2ex.allowForward2 := Mux(opcode === InstructionType.R || opcode === InstructionType.RW || opcode === InstructionType.S || opcode === InstructionType.B, true.asBool, false.asBool)
 
   // Control related
   // todo: support interrupt and csr memory page

@@ -19,15 +19,20 @@ class MemoryAccess extends Module {
 //    val csrWriteEnable_in = Input(UInt(Defines.dataWidth))
 //    val aluResult_in = Input(UInt(Defines.dataWidth))
 //
-//    val regWriteEnable_out = Output(Bool())
-//    val regWriteData = Output(UInt(Defines.dataWidth))
-//    val regWriteDest_out = Output(UInt(Defines.regAddrWidth))
-//    val csrAddr_out = Output(UInt(Defines.csrAddrWidth))
-//    val csrWriteEnable_out = Output(UInt(Defines.dataWidth))
+
     val in = Flipped(new AluOutBundle)
+    val out = new MemOutBundle
     val memoryBundle = Flipped(new RAMBundle)
   })
 
+  val csrResult = MuxLookup(io.in.csrType, 0.U(Defines.dataWidth), IndexedSeq(
+    0x1.U(3.W) -> io.in.aluResult,
+    0x5.U(3.W) -> io.in.aluResult,
+    0x2.U(3.W) -> (io.in.aluResult & io.in.csrReadData),
+    0x6.U(3.W) -> (io.in.aluResult & io.in.csrReadData),
+    0x3.U(3.W) -> (io.in.aluResult | io.in.csrReadData),
+    0x7.U(3.W) -> (io.in.aluResult | io.in.csrReadData)
+  ))
   io.memoryBundle.memAccessAddr := io.in.aluResult
   val memReadResult = Wire(UInt(Defines.dataWidth))
   val readDataResult = io.memoryBundle.dataReadResult
@@ -46,10 +51,16 @@ class MemoryAccess extends Module {
   io.memoryBundle.memWriteEnable := io.in.memWriteEnable
 
 
-  io.regWriteData := MuxLookup(io.in.regWriteSource, 0.U(Defines.dataWidth), IndexedSeq(
+  io.out.regWriteData := MuxLookup(io.in.regWriteSource, 0.U(Defines.dataWidth), IndexedSeq(
     RegWriteSource.alu -> io.in.aluResult,
     RegWriteSource.nextPC -> io.in.aluResult,
     RegWriteSource.mem -> memReadResult,
-    RegWriteSource.csr ->
+    RegWriteSource.csr -> io.in.csrReadData
   ))
+
+  io.out.regWriteEnable := io.in.regWriteEnable
+  io.out.regWriteDest := io.in.regWriteDest
+  io.out.csrWriteEnable := io.in.csrWriteEnable
+  io.out.csrWriteData := io.in.csrReadData
+  io.out.csrWriteAddr := io.in.csrWriteDest
 }

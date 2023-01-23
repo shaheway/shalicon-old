@@ -12,6 +12,9 @@ class AluOutBundle extends Bundle {
   val regWriteDest = Output(UInt(Defines.regAddrWidth))
   // val csrAddr_out = Output(UInt(Defines.csrAddrWidth))
   val csrWriteEnable = Output(UInt(Defines.dataWidth))
+  val csrReadData = Output(UInt(Defines.dataWidth))
+  val csrType = Output(UInt(3.W))
+  val csrWriteDest = Output(UInt(Defines.csrAddrWidth))
   val aluResult = Output(UInt(Defines.dataWidth))
   val rs2Data = Output(UInt(Defines.dataWidth))
 }
