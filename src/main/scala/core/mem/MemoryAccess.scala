@@ -7,19 +7,6 @@ import core.decode.{LtypeFunct3, RegWriteSource}
 import peripheral.memory.RAMBundle
 class MemoryAccess extends Module {
   val io = IO(new Bundle() {
-//    val rs2Data_in = Input(UInt(Defines.dataWidth))
-//    val memReadEnable_in = Input(Bool())
-//    val memReadType_in = Input(UInt(3.W))
-//    val memWriteType_in = Input(UInt(3.W))
-//    val memWriteEnable_in = Input(Bool())
-//    val regWriteEnable_in = Input(Bool())
-//    val regWriteSource_in = Input(UInt(3.W))
-//    val regWriteDest_in = Input(UInt(Defines.regAddrWidth))
-//    val csrAddr_in = Input(UInt(Defines.csrAddrWidth))
-//    val csrWriteEnable_in = Input(UInt(Defines.dataWidth))
-//    val aluResult_in = Input(UInt(Defines.dataWidth))
-//
-
     val in = Flipped(new AluOutBundle)
     val out = new MemOutBundle
     val memoryBundle = Flipped(new RAMBundle)

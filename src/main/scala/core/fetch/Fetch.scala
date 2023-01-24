@@ -1,6 +1,6 @@
 package core.fetch
 import chisel3._
-import chisel3.util.MuxCase
+import chisel3.util.{Decoupled, MuxCase}
 import common.Defines
 
 class Fetch extends Module {
@@ -10,8 +10,7 @@ class Fetch extends Module {
     val jumpAddress = Input(UInt(Defines.instAddrWidth))
     val rom_instruction = Input(UInt(Defines.instructionWidth))
     // val instruction_valid = Input(Bool())
-    val instruction_address = Output(UInt(Defines.instAddrWidth))
-    val instruction_id = Output(UInt(Defines.instructionWidth))
+    val out2id = new FetchOutBundle
   })
   val progCounter = RegInit(Defines.entryPC)
 
@@ -20,6 +19,8 @@ class Fetch extends Module {
     (io.jumpFlag && !io.ctrl_stallFlag) -> io.jumpAddress
   ))
 
-  io.instruction_address := progCounter
-  io.instruction_id := io.rom_instruction
+  io.out2id.instruction_address := progCounter
+  io.out2id.instruction_id := io.rom_instruction
+
+
 }
