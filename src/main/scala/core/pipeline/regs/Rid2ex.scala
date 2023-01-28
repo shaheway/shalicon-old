@@ -3,7 +3,7 @@ package core.pipeline.regs
 import chisel3._
 import chisel3.util.{Decoupled, Enum, MuxLookup}
 import common.Defines
-import core.frontend.decode.DecodeOutBundle
+import core.decode.DecodeOutBundle
 import core.pipeline.PipelineReg
 
 class Rid2ex extends Module {

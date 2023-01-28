@@ -1,4 +1,4 @@
-package core.frontend.decode
+package core.decode
 
 import chisel3._
 object ItypeFunct3 {
