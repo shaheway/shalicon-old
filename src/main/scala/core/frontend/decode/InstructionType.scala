@@ -1,4 +1,5 @@
-package core.decode
+package core.frontend.decode
+
 import chisel3._
 object InstructionType {
   val R = "b0110011".U(7.W)

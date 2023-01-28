@@ -3,7 +3,7 @@ import chisel3._
 import chisel3.util.{Cat, Fill, MuxLookup}
 import common.Defines
 import core.alu.AluOutBundle
-import core.decode.{LtypeFunct3, RegWriteSource}
+import core.frontend.decode.{LtypeFunct3, RegWriteSource}
 import peripheral.memory.RAMBundle
 class MemoryAccess extends Module {
   val io = IO(new Bundle() {

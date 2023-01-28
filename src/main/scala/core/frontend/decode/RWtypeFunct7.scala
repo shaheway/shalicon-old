@@ -1,4 +1,5 @@
-package core.decode
+package core.frontend.decode
+
 import chisel3._
 object RWtypeFunct7 {
   val addw = 0x0.U(7.W)

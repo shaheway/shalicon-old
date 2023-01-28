@@ -2,7 +2,7 @@ package core.alu
 import chisel3._
 import chisel3.util.{Cat, Fill, MuxLookup}
 import common.Defines
-import core.decode.DecodeOutBundle
+import core.frontend.decode.DecodeOutBundle
 import core.hazard.HazardType
 
 class Alu extends Module {

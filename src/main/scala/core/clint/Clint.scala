@@ -2,7 +2,7 @@ package core.clint
 import chisel3._
 import chisel3.util.{Cat, MuxLookup}
 import common.Defines
-import core.decode.PrivilegedISA
+import core.frontend.decode.PrivilegedISA
 
 class Clint extends Module {
   val io = IO(new Bundle() {

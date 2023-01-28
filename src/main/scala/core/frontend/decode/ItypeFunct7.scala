@@ -1,4 +1,5 @@
-package core.decode
+package core.frontend.decode
+
 import chisel3._
 object ItypeFunct7 {
   val slli = 0x0.U(6.W)

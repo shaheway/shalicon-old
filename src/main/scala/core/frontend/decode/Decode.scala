@@ -1,4 +1,5 @@
-package core.decode
+package core.frontend.decode
+
 import chisel3._
 import chisel3.util.{Cat, Fill, MuxLookup, MuxCase}
 import common.Defines
