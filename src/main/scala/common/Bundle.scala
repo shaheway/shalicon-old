@@ -11,14 +11,14 @@ class RedirectIO extends Bundle with CoreConfig {
   val valid = Output(Bool())
 }
 
-class CtrlFlowIO extends Bundle with CoreConfig {
+class InstFlowIO extends Bundle with CoreConfig {
   val instruction = Output(UInt(instwidth))
   val pc = Output(UInt(addrwidth))
-  val predict_nextpc = Output(UInt(addrwidth))
-  val redirect = new RedirectIO
-  val isBranch = Output(Bool())
 }
 
+class ROBInIO extends Bundle with CoreConfig {
+  val
+}
 
 class CtrlSignalIO extends Bundle with CoreConfig {
   val src1Type = Output(UInt(2.W))
@@ -35,8 +35,8 @@ class DecodeOutIO extends Bundle with CoreConfig {
 }
 
 class InstFetchIO extends Bundle with CoreConfig {
-  val pc = Output(UInt(addrwidth))
-  val predict_nextpc = Output(UInt(addrwidth))
-  val branchIdx = Output(UInt(4.W))
-  val instValid = Output(UInt(4.W))
+  val cur_pc = Output(UInt(addrwidth))
+  val pnext_pc = Output(UInt(addrwidth)) // predicted next pc
+  val cur_instruction = Output(UInt(instwidth))
+  val pnext_instruction = Output(UInt(instwidth)) // predict next instruction
 }
