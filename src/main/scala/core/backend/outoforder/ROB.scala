@@ -37,6 +37,7 @@ class ROB(Line: Int = 32) extends Module {
   val io = IO(new Bundle() {
     val entry = Flipped(Decoupled(new EntryIO))
     val update_state = Flipped(Decoupled(new UpdateStateIO))
+    val forward = new ForwardIO
     val out = Decoupled(new EntryIO)
   })
 
@@ -66,4 +67,7 @@ class ROB(Line: Int = 32) extends Module {
   io.out.valid := !is_empty
 
   rob(tail) <> io.out.bits
+
+  // forward
+  io.forward.rs1Addr
 }

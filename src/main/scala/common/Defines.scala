@@ -11,4 +11,5 @@ object Defines {
   val csrAddrWidth = 12.W
   val aluopTypeWidth = 5.W
   val entryPC = 0x10000.U(instAddrWidth)
+
 }
