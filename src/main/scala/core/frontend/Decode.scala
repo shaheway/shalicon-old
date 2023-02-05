@@ -119,6 +119,7 @@ class Decoder extends Module with CoreConfig {
   io.path.reg1Addr := Mux(src1Type === SrcType.reg, rs1, 0.U)
   io.path.reg2Addr := Mux(src2Type === SrcType.reg, rs2, 0.U)
   io.path.immediate := immediate
+  io.path.destAddr := rd
 
   io.isBranch := (opcode === InstructionType.B || opcode === InstructionType.jal || opcode === InstructionType.jalr)
 }
@@ -126,29 +127,32 @@ class DecoderIO extends Bundle with CoreConfig{
   val instruction = Input(UInt(instwidth))
   val src1Type = Output(UInt(2.W))
   val src2Type = Output(UInt(2.W))
-  val functU = Output(UInt(2.W))
+  val functU = Output(UInt(FunctUType.functUTypeLen))
   val functOp = Output(UInt(4.W))
   val reg1Addr = Output(UInt(2.W))
   val reg2Addr = Output(UInt(2.W))
   val immediate = Output(UInt(datawidth))
+  val destAddr = Output(UInt(regaddrwidth))
 }
 class DecoderPath extends Bundle with CoreConfig {
   val src1Type = UInt(2.W)
   val src2Type = UInt(2.W)
-  val functU = UInt(2.W)
+  val functU = UInt(FunctUType.functUTypeLen)
   val functOp = UInt(4.W)
   val reg1Addr = UInt(2.W)
   val reg2Addr = UInt(2.W)
   val immediate = UInt(datawidth)
+  val destAddr = UInt(regaddrwidth)
 }
 class DecoderPathIO extends Bundle with CoreConfig {
   val src1Type = Output(UInt(2.W))
   val src2Type = Output(UInt(2.W))
-  val functU = Output(UInt(2.W))
+  val functU = Output(UInt(FunctUType.functUTypeLen))
   val functOp = Output(UInt(4.W))
   val reg1Addr = Output(UInt(2.W))
   val reg2Addr = Output(UInt(2.W))
   val immediate = Output(UInt(datawidth))
+  val destAddr = Output(UInt(regaddrwidth))
 }
 class DecoderIOBundle extends Bundle with CoreConfig {
   val pc = UInt(addrwidth)

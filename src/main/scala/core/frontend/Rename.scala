@@ -1,7 +1,7 @@
 package core.frontend
 import chisel3._
 import chisel3.util.{Decoupled, MuxCase, PriorityEncoder, PriorityEncoderOH, PriorityMux}
-import common.CtrlSignalIO
+import common.{CtrlSignalIO, FunctUType}
 import core.CoreConfig
 // 32 logic reg in total, 64 physical reg in total
 // 0号逻辑寄存器映射到0号物理寄存器
@@ -11,18 +11,20 @@ class RenameOut extends Bundle with CoreConfig {
   val functOp = Output(UInt(4.W))
   val reg1Addr = Output(UInt(physical_regaddrwidth))
   val reg2Addr = Output(UInt(physical_regaddrwidth))
-  val imm = Output(UInt(datawidth))
+  val immediate = Output(UInt(datawidth))
   val destAddr = Output(UInt(physical_regaddrwidth))
 }
 class Rename extends Module with CoreConfig {
   val io = IO(new Bundle() {
-    val in = Flipped(Decoupled(new CtrlSignalIO))
-    val out = Decoupled(new RenameOut)
+    val in = Flipped(Decoupled(new DecodeOutIO))
+    val out2alu = Decoupled(new RenameOut)
+    val out2csru = Decoupled(new RenameOut)
+    val out2lsu = Decoupled(new RenameOut)
   })
   val map_table = Reg(Vec(32, UInt(regaddrwidth)))
   val free_list = Reg(Vec(64, Bool()))
   val busy_table = Reg(Vec(64, Bool()))
-  val remap_table = RegInit(VecInit(Seq.fill(32)(0.U(6.W))))
+  // val remap_table = RegInit(VecInit(Seq.fill(32)(0.U(6.W))))
 
   when(reset.asBool){ // 初始化map table
     for (i <- 0 until 32){
@@ -36,21 +38,39 @@ class Rename extends Module with CoreConfig {
     }
   }
 
-  io.out.bits.functOp := io.in.bits.functOp
-  io.out.bits.src1Type := io.in.bits.src1Type
-  io.out.bits.src2Type := io.in.bits.src2Type
+  io.out.bits.functOp := io.in.bits.path.functOp
+  io.out.bits.src1Type := io.in.bits.path.src1Type
+  io.out.bits.src2Type := io.in.bits.path.src2Type
   io.out.bits.imm := 0.U(datawidth) // todo
-  io.out.bits.reg1Addr := map_table(io.in.bits.reg1Addr)
-  io.out.bits.reg2Addr := map_table(io.in.bits.reg2Addr)
+  io.out.bits.reg1Addr := map_table(io.in.bits.path.reg1Addr)
+  io.out.bits.reg2Addr := map_table(io.in.bits.path.reg2Addr)
 
   // find an idle physical register
   val destidx = PriorityEncoder(free_list)
-  io.out.bits.destAddr := destidx
-
-  // 判断是否能发射
-  io.out.valid := !busy_table(io.in.bits.reg1Addr) && !busy_table(io.in.bits.reg2Addr)
 
   // 更新free_list
-  free_list(destidx) := Mux(io.out.valid, false.B, free_list(destidx))
+  // todo: As types of functional unit increase, Mux condition should change with more OR-gate
+  free_list(destidx) := Mux(io.out2alu.valid || io.out2lsu.valid || io.out2csru.valid, false.B, free_list(destidx))
+
+  // 发射到ALU
+  // 判断是否能发射
+  io.out2alu.valid := !busy_table(io.in.bits.path.reg1Addr) && !busy_table(io.in.bits.path.reg2Addr) && (io.in.bits.path.functU === FunctUType.alu)
+  io.out2alu.bits.functOp := io.in.bits.path.functOp
+  io.out2alu.bits.src1Type := io.in.bits.path.src1Type
+  io.out2alu.bits.src2Type := io.in.bits.path.src2Type
+  io.out2alu.bits.reg1Addr := map_table(io.in.bits.path.reg1Addr)
+  io.out2alu.bits.reg2Addr := map_table(io.in.bits.path.reg2Addr)
+  io.out2alu.bits.immediate := io.in.bits.path.immediate
+  io.out2alu.bits.destAddr := destidx
+
+  // 发射到LSU
+  io.out2lsu.valid := !busy_table(io.in.bits.path.reg1Addr) && !busy_table(io.in.bits.path.reg2Addr) && (io.in.bits.path.functU === FunctUType.alu)
+  io.out2lsu.bits.functOp := io.in.bits.path.functOp
+  io.out2lsu.bits.src1Type := io.in.bits.path.src1Type
+  io.out2lsu.bits.src2Type := io.in.bits.path.src2Type
+  io.out2lsu.bits.reg1Addr := map_table(io.in.bits.path.reg1Addr)
+  io.out2lsu.bits.reg2Addr := map_table(io.in.bits.path.reg2Addr)
+  io.out2lsu.bits.immediate := io.in.bits.path.immediate
+  io.out2lsu.bits.destAddr := destidx
 }
 
