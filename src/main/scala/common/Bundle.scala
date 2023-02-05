@@ -34,9 +34,3 @@ class DecodeOutIO extends Bundle with CoreConfig {
   val ctrlFlow = new CtrlFlowIO
 }
 
-class InstFetchIO extends Bundle with CoreConfig {
-  val cur_pc = Output(UInt(addrwidth))
-  val pnext_pc = Output(UInt(addrwidth)) // predicted next pc
-  val cur_instruction = Output(UInt(instwidth))
-  val pnext_instruction = Output(UInt(instwidth)) // predict next instruction
-}

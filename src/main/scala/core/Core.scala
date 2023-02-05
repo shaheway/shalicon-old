@@ -9,6 +9,7 @@ trait CoreConfig {
   val physical_regaddrwidth = 6.W
   val addrwidth = 64.W
   val resetVector = 0x60000000L.U(addrwidth)
+  val robwidth = 3.W
 }
 
 class Core extends Module with CoreConfig {

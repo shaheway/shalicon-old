@@ -1,19 +1,17 @@
 package core.frontend
 import chisel3.{Mux, _}
 import chisel3.util.{Cat, Decoupled, Fill, MuxCase, MuxLookup}
-import common.{CSRTypeFunct3, CtrlFlowIO, DecodeOutIO, FunctUType, IWtypeFunct3, IWtypeFunct7, InstructionType, ItypeFunct3, ItypeFunct7, RWtypeFunct3, RWtypeFunct7, RegWriteSource, RtypeFunct3, RtypeFunct7, SrcType}
+import common.{CSRTypeFunct3, DecodeOutIO, FunctUType, IWtypeFunct3, IWtypeFunct7, InstructionType, ItypeFunct3, ItypeFunct7, RWtypeFunct3, RWtypeFunct7, RegWriteSource, RtypeFunct3, RtypeFunct7, SrcType}
 import core.CoreConfig
-import core.alu.AluopType
 
-class Decoder extends Module with CoreConfig{
+class Decoder extends Module with CoreConfig {
   val io = IO(new Bundle() {
-    val in = Flipped(Decoupled(new CtrlFlowIO))
-    val out = Decoupled(new DecodeOutIO)
+    val path = new DecoderIO
     val isBranch = Output(Bool())
   })
 
-  val instruction = io.in.bits.instruction
-  val pc = io.in.bits.pc
+  val instruction = io.path.instruction
+  val pc = io.path.pc
   val opcode = instruction(6, 0)
   val rd = instruction(11, 7)
   val funct3 = instruction(14, 12)
@@ -161,17 +159,48 @@ class Decoder extends Module with CoreConfig{
 
   io.isBranch := (opcode === InstructionType.B || opcode === InstructionType.jal || opcode === InstructionType.jalr)
 }
+class DecoderIO extends Bundle with CoreConfig{
+  val pc = Input(UInt(addrwidth))
+  val instruction = Input(UInt(instwidth))
+  val src1Type = Output(UInt(2.W))
+  val src2Type = Output(UInt(2.W))
+  val functU = Output(UInt(2.W))
+  val functOp = Output(UInt(4.W))
+  val reg1Addr = Output(UInt(2.W))
+  val reg2Addr = Output(UInt(2.W))
+  val imm = Output(UInt(datawidth))
+}
+class DecoderIOBundle extends Bundle with CoreConfig {
+  val pc = UInt(addrwidth)
+  val instruction = UInt(instwidth)
+  val src1Type = UInt(2.W)
+  val src2Type = UInt(2.W)
+  val functU = UInt(2.W)
+  val functOp = UInt(4.W)
+  val reg1Addr = UInt(2.W)
+  val reg2Addr = UInt(2.W)
+  val imm = UInt(datawidth)
+}
+class DecoderIn extends Bundle with CoreConfig {
+  val pc = Input(UInt(addrwidth))
+  val instruction = Input(UInt(instwidth))
+}
 class Decode extends Module with CoreConfig {
   val io = IO(new Bundle() {
-    val in = Vec(2, Flipped(Decoupled(new CtrlFlowIO)))
+    val in = Flipped(Decoupled(new IBuffer2DecodeIO))
     val out = Vec(2, Flipped(Decoupled(new DecodeOutIO)))
   })
   val decoder0 = Module(new Decoder)
   val decoder1 = Module(new Decoder)
+  val decoder0IO = Wire(new DecoderIOBundle)
+  decoder0IO.pc := io.in.bits.cur_pc
+  decoder0IO.instruction := io.in.bits.cur_instruction
 
-  io.in(0) <> decoder0.io.in
-  io.in(1) <> decoder1.io.in
-  io.out(0) <> decoder0.io.out
-  io.out(1) <> decoder1.io.out
+  val decoder1IO = Wire(new DecoderIOBundle)
+  decoder1IO.pc := io.in.bits.pnext_pc
+  decoder1IO.instruction := io.in.bits.pnext_instruction
+
+  decoder0.io.path <> decoder0IO
+  decoder1.io.path <> decoder1IO
 
 }

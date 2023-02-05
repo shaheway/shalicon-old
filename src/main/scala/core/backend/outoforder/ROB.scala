@@ -1,9 +1,10 @@
 package core.backend.outoforder
 import chisel3._
-import chisel3.util.{Decoupled, DecoupledIO, Queue, log2Up}
+import chisel3.util.{Decoupled, DecoupledIO, Enum, Queue, log2Up}
 import core.CoreConfig
 
 object ROBState {
+  // val decode:: issue:: exec_alu:: exec_imul:: exec_fpu:: exec_lsu:: write:: commit:: Nil = Enum(8)
   val issue = 0x0.U
   val exec_alu = 0x1.U
   val exec_imul = 0x2.U
@@ -14,31 +15,32 @@ object ROBState {
   val write = 0x5.U
   val commit = 0x6.U
 }
-class RobStructure(entities: Int = 32) extends Bundle with CoreConfig {
+class RobStructure(entities: Int = 8) extends Bundle with CoreConfig {
   val entry = UInt(log2Up(entities).W) // 有效位
   val busy = Bool()
-  val instruction = UInt(instwidth)
+  val pc = UInt(addrwidth)
   val state = UInt(3.W) // 状态
   val destination = UInt(5.W)
   val value = UInt(datawidth)
 }
 class EntryIO extends Bundle with CoreConfig {
-  val pc = Output(UInt(addrwidth))
-  val instruction = Output(UInt(instwidth))
+  val cur_pc = Output(UInt(addrwidth))
+  val pnext_pc = Output(UInt(addrwidth))
 }
-class RobQueueStructure(entities: Int = 32) extends Bundle {
-  val valid = Bool()
-  val regLine = UInt(log2Up(entities).W)
+class ROB2iBuf(entities: Int = 8) extends Bundle {
+  val cur_entry = Output(UInt(log2Up(entities).W))
+  val pnext_entry = Output(UInt(log2Up(entities).W))
 }
 class UpdateStateIO extends Bundle with CoreConfig {
 
 }
-class ROB(Line: Int = 32) extends Module {
+class ROB(Line: Int = 8) extends Module {
   val io = IO(new Bundle() {
     val entry = Flipped(Decoupled(new EntryIO))
+    val out2ibuf = Decoupled(new ROB2iBuf(entities = 8))
     val update_state = Flipped(Decoupled(new UpdateStateIO))
     val forward = new ForwardIO
-    val out = Decoupled(new EntryIO)
+    val out = Decoupled()
   })
 
   val head = RegInit(0.U(log2Up(Line).W)) // 头指针
@@ -60,7 +62,12 @@ class ROB(Line: Int = 32) extends Module {
 
   val rob = Reg(Vec(Line, new RobStructure(entities = Line)))
   when(do_enq){
-    rob(head) := io.entry
+    rob(head).entry := head
+    rob(head).busy := true.B
+    rob(head).pc := io.entry.bits.cur_pc
+    rob(head+1.U).entry := head+1.U
+    rob(head+1.U).busy := true.B
+    rob(head+1.U).pc := io.entry.bits.pnext_pc
   }
 
   io.entry.ready := !is_full
@@ -70,4 +77,8 @@ class ROB(Line: Int = 32) extends Module {
 
   // forward
   io.forward.rs1Addr
+
+  // To instruction buffer
+  io.out2ibuf.bits.cur_entry := head
+  io.out2ibuf.bits.pnext_entry := head + 1.U
 }
