@@ -1,8 +1,9 @@
 package core.frontend
 import chisel3.{Mux, _}
 import chisel3.util.{Cat, Decoupled, Fill, MuxCase, MuxLookup}
-import common.{CSRTypeFunct3, DecodeOutIO, FunctUType, IWtypeFunct3, IWtypeFunct7, InstructionType, ItypeFunct3, ItypeFunct7, RWtypeFunct3, RWtypeFunct7, RegWriteSource, RtypeFunct3, RtypeFunct7, SrcType}
+import common.{CSRTypeFunct3, CtrlSignalIO, DecodeOutIO, FunctUType, IWtypeFunct3, IWtypeFunct7, InstructionType, ItypeFunct3, ItypeFunct7, RWtypeFunct3, RWtypeFunct7, RegWriteSource, RtypeFunct3, RtypeFunct7, SrcType}
 import core.CoreConfig
+import core.backend.funcU.AluopType
 
 class Decoder extends Module with CoreConfig {
   val io = IO(new Bundle() {
@@ -11,7 +12,6 @@ class Decoder extends Module with CoreConfig {
   })
 
   val instruction = io.path.instruction
-  val pc = io.path.pc
   val opcode = instruction(6, 0)
   val rd = instruction(11, 7)
   val funct3 = instruction(14, 12)
@@ -41,41 +41,27 @@ class Decoder extends Module with CoreConfig {
     )
   )
 
-  val regWriteSource = MuxLookup(
-    opcode,
-    RegWriteSource.nop,
-    IndexedSeq(
-      InstructionType.R -> RegWriteSource.alu,
-      InstructionType.RW -> RegWriteSource.alu,
-      InstructionType.I -> RegWriteSource.alu,
-      InstructionType.IW -> RegWriteSource.alu,
-      InstructionType.L -> RegWriteSource.mem,
-      InstructionType.B -> RegWriteSource.nop,
-      InstructionType.S -> RegWriteSource.nop,
-      InstructionType.jal -> RegWriteSource.nextPC,
-      InstructionType.jalr -> RegWriteSource.nextPC,
-      InstructionType.lui -> RegWriteSource.alu,
-      InstructionType.auipc -> RegWriteSource.alu,
-      InstructionType.csr -> RegWriteSource.csr
-    )
-  )
+  val src1Type = MuxLookup(opcode, SrcType.reg, IndexedSeq(
+    InstructionType.auipc -> SrcType.pc,
+    InstructionType.jal -> SrcType.pc,
+    InstructionType.B -> SrcType.pc,
+    InstructionType.csr -> Mux(funct3 === CSRTypeFunct3.csrrci || funct3 === CSRTypeFunct3.csrrsi || funct3 === CSRTypeFunct3.csrrwi, SrcType.imm, SrcType.reg)
+  ))
+  val src2Type = Mux(opcode === InstructionType.R || opcode === InstructionType.RW, SrcType.reg, SrcType.imm)
 
-  val regWriteEnable = MuxLookup(
-    opcode,
-    false.B,
-    IndexedSeq(
-      InstructionType.R -> true.B,
-      InstructionType.RW -> true.B,
-      InstructionType.I -> true.B,
-      InstructionType.IW -> true.B,
-      InstructionType.L -> true.B,
-      InstructionType.jal -> true.B,
-      InstructionType.jalr -> true.B,
-      InstructionType.lui -> true.B,
-      InstructionType.auipc -> true.B,
-      InstructionType.csr -> true.B
-    )
-  )
+  val functU = MuxLookup(opcode, FunctUType.alu, IndexedSeq(
+    // InstructionType.R -> FunctUType.alu,
+    // InstructionType.RW -> FunctUType.alu,
+    // InstructionType.I -> FunctUType.alu,
+    // InstructionType.IW -> FunctUType.alu,
+    InstructionType.L -> FunctUType.lsu,
+    InstructionType.csr -> FunctUType.csru,
+    // InstructionType.lui -> FunctUType.alu,
+    // InstructionType.auipc -> FunctUType.alu
+    InstructionType.fenceI -> FunctUType.mou,
+    InstructionType.E -> FunctUType.csru
+  ))
+
   val opType = MuxLookup(
     opcode,
     AluopType.nop,
@@ -125,42 +111,18 @@ class Decoder extends Module with CoreConfig {
       InstructionType.auipc -> AluopType.add
     )
   )
-  val memReadEnable = Mux(opcode === InstructionType.L, true.B, false.B)
-  val memWriteEnable = Mux(opcode === InstructionType.S, true.B, false.B)
 
-  val src1Type = MuxLookup(opcode, SrcType.reg, IndexedSeq(
-    InstructionType.auipc -> SrcType.pc,
-    InstructionType.jal -> SrcType.pc,
-    InstructionType.B -> SrcType.pc,
-    InstructionType.csr -> Mux(funct3 === CSRTypeFunct3.csrrci || funct3 === CSRTypeFunct3.csrrsi || funct3 === CSRTypeFunct3.csrrwi, SrcType.imm, SrcType.reg)
-  ))
-  val src2Type = Mux(opcode === InstructionType.R || opcode === InstructionType.RW, SrcType.reg, SrcType.imm)
-
-  io.out.bits.ctrlFlow <> io.in.bits
-  val functU = MuxLookup(opcode, FunctUType.alu, IndexedSeq(
-    // InstructionType.R -> FunctUType.alu,
-    // InstructionType.RW -> FunctUType.alu,
-    // InstructionType.I -> FunctUType.alu,
-    // InstructionType.IW -> FunctUType.alu,
-    InstructionType.L -> FunctUType.lsu,
-    InstructionType.csr -> FunctUType.csru,
-    // InstructionType.lui -> FunctUType.alu,
-    // InstructionType.auipc -> FunctUType.alu
-    InstructionType.fenceI -> FunctUType.mou,
-    InstructionType.E -> FunctUType.csru
-  ))
-
-  io.out.bits.ctrlSignal.reg1Addr := rs1
-  io.out.bits.ctrlSignal.reg2Addr := rs2
-  io.out.bits.ctrlSignal.functU := functU
-  io.out.bits.ctrlSignal.functOp := opType
-  io.out.bits.ctrlSignal.src1Type := src1Type
-  io.out.bits.ctrlSignal.src2Type := src2Type
+  io.path.src1Type := src1Type
+  io.path.src2Type := src2Type
+  io.path.functU := functU
+  io.path.functOp := opType
+  io.path.reg1Addr := Mux(src1Type === SrcType.reg, rs1, 0.U)
+  io.path.reg2Addr := Mux(src2Type === SrcType.reg, rs2, 0.U)
+  io.path.immediate := immediate
 
   io.isBranch := (opcode === InstructionType.B || opcode === InstructionType.jal || opcode === InstructionType.jalr)
 }
 class DecoderIO extends Bundle with CoreConfig{
-  val pc = Input(UInt(addrwidth))
   val instruction = Input(UInt(instwidth))
   val src1Type = Output(UInt(2.W))
   val src2Type = Output(UInt(2.W))
@@ -168,22 +130,34 @@ class DecoderIO extends Bundle with CoreConfig{
   val functOp = Output(UInt(4.W))
   val reg1Addr = Output(UInt(2.W))
   val reg2Addr = Output(UInt(2.W))
-  val imm = Output(UInt(datawidth))
+  val immediate = Output(UInt(datawidth))
 }
-class DecoderIOBundle extends Bundle with CoreConfig {
-  val pc = UInt(addrwidth)
-  val instruction = UInt(instwidth)
+class DecoderPath extends Bundle with CoreConfig {
   val src1Type = UInt(2.W)
   val src2Type = UInt(2.W)
   val functU = UInt(2.W)
   val functOp = UInt(4.W)
   val reg1Addr = UInt(2.W)
   val reg2Addr = UInt(2.W)
-  val imm = UInt(datawidth)
+  val immediate = UInt(datawidth)
 }
-class DecoderIn extends Bundle with CoreConfig {
-  val pc = Input(UInt(addrwidth))
-  val instruction = Input(UInt(instwidth))
+class DecoderPathIO extends Bundle with CoreConfig {
+  val src1Type = Output(UInt(2.W))
+  val src2Type = Output(UInt(2.W))
+  val functU = Output(UInt(2.W))
+  val functOp = Output(UInt(4.W))
+  val reg1Addr = Output(UInt(2.W))
+  val reg2Addr = Output(UInt(2.W))
+  val immediate = Output(UInt(datawidth))
+}
+class DecoderIOBundle extends Bundle with CoreConfig {
+  val pc = UInt(addrwidth)
+  val path = new DecoderPath
+  val instruction = UInt(instwidth)
+}
+class DecodeOutIO extends Bundle with CoreConfig {
+  val pc = Output(UInt(addrwidth))
+  val path = new DecoderPathIO
 }
 class Decode extends Module with CoreConfig {
   val io = IO(new Bundle() {
@@ -203,4 +177,8 @@ class Decode extends Module with CoreConfig {
   decoder0.io.path <> decoder0IO
   decoder1.io.path <> decoder1IO
 
+  io.out(0).bits.pc := decoder0IO.pc
+  io.out(0).bits.path <> decoder0IO.path
+  io.out(1).bits.pc := decoder1IO.pc
+  io.out(1).bits.path <> decoder1IO.path
 }
