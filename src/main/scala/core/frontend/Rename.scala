@@ -38,13 +38,6 @@ class Rename extends Module with CoreConfig {
     }
   }
 
-  io.out.bits.functOp := io.in.bits.path.functOp
-  io.out.bits.src1Type := io.in.bits.path.src1Type
-  io.out.bits.src2Type := io.in.bits.path.src2Type
-  io.out.bits.imm := 0.U(datawidth) // todo
-  io.out.bits.reg1Addr := map_table(io.in.bits.path.reg1Addr)
-  io.out.bits.reg2Addr := map_table(io.in.bits.path.reg2Addr)
-
   // find an idle physical register
   val destidx = PriorityEncoder(free_list)
 
