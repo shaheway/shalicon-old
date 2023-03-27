@@ -1,0 +1,48 @@
+package de
+import chisel3._
+import chisel3.util._
+import chiseltest._
+import org.scalatest.flatspec.AnyFlatSpec
+
+class QueueModule extends Module {
+  val io = IO(new Bundle {
+    val a = Flipped(Decoupled(UInt(32.W))) // valid and bits are inputs
+    val b = Flipped(Decoupled(UInt(32.W)))
+    val z = Decoupled(UInt(32.W)) // valid and bits are outputs
+  })
+  // Note that a, b, and z are all of type DecoupledIO
+
+  // Buffer the inputs with queues
+  val qa = Queue(io.a) // io.a is the input to the FIFO
+  // qa is DecoupledIO output from FIFO
+  val qb = Queue(io.b)
+
+  // We only dequeue when io.z is ready
+  qa.nodeq() // equivalent to qa.ready := false.B
+  qb.nodeq()
+
+  // When qa and qb have valid inputs and io.z is ready for an output
+  when (qa.valid && qb.valid && io.z.ready) {
+    io.z.enq(qa.deq() + qb.deq())
+    /* The above is short for
+      io.z.valid := true.B
+      io.z.bits := qa.bits + qb.bits
+      qa.ready := true.B
+      qb.ready := true.B
+    */
+  }
+}
+
+class Test extends AnyFlatSpec with ChiselScalatestTester {
+  val dut = new QueueModule
+  dut.clock.step()
+  dut.io.a.bits := 1.U(64.W)
+  println("out0: " + dut.io.out(0) + "\n")
+  println("out1: " + dut.io.out(1) + "\n")
+  dut.clock.step()
+  dut.io.in.bits := 2.U(64.W)
+  println("out0: " + dut.io.out(0) + "\n")
+  println("out1: " + dut.io.out(1) + "\n")
+  dut.clock.step()
+
+}

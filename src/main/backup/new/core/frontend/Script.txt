@@ -1,0 +1,8 @@
+  val src1Type = Output(UInt(2.W))
+  val src2Type = Output(UInt(2.W))
+  val functU = Output(UInt(2.W))
+  val functOp = Output(UInt(4.W))
+  val reg1Addr = Output(UInt(physical_regaddrwidth))
+  val reg2Addr = Output(UInt(physical_regaddrwidth))
+  val imm = Output(UInt(datawidth))
+  val destAddr = Output(UInt(physical_regaddrwidth))

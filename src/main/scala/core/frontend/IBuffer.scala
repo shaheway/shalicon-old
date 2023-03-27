@@ -1,25 +1,16 @@
 package core.frontend
 import chisel3._
-import chisel3.util.{Decoupled, Queue}
-import common.InstFlowIO
+import chisel3.util.Decoupled
 import core.CoreConfig
-import core.backend.outoforder.ROB2iBuf
 
-class InstFetchIO extends Bundle with CoreConfig {
-  val cur_pc = Output(UInt(addrwidth))
-  val pnext_pc = Output(UInt(addrwidth)) // predicted next pc
+class Icc2ibuf extends Bundle with CoreConfig { // Instruction Cache to instruction buffer
   val cur_instruction = Output(UInt(instwidth))
-  val pnext_instruction = Output(UInt(instwidth)) // predict next instruction
-}
-class IBufferInstInIO extends Bundle with CoreConfig {
-  val pc = UInt(addrwidth)
-  val instruction = UInt(instwidth)
-}
-class IBuffer2ROB extends Bundle with CoreConfig {
   val cur_pc = Output(UInt(addrwidth))
+  val pnext_instruction = Output(UInt(instwidth))
   val pnext_pc = Output(UInt(addrwidth))
 }
-class IBuffer2DecodeIO extends Bundle with CoreConfig {
+
+class Ibuf2dec extends Bundle with CoreConfig {
   val cur_pc = Output(UInt(addrwidth))
   val cur_instruction = Output(UInt(instwidth))
   val cur_entry = Output(UInt(robwidth))
@@ -27,32 +18,34 @@ class IBuffer2DecodeIO extends Bundle with CoreConfig {
   val pnext_instruction = Output(UInt(instwidth))
   val pnext_entry = Output(UInt(robwidth))
 }
+
+class Ibuf2rob extends Bundle with CoreConfig {
+  val cur_pc = Output(UInt(addrwidth))
+  val pnext_pc = Output(UInt(addrwidth))
+}
+
+class Rob2ibuf extends Bundle with CoreConfig {
+  val cur_entry = Output(UInt(robwidth))
+  val pnext_entry = Output(UInt(robwidth))
+}
 class IBuffer extends Module with CoreConfig {
   val io = IO(new Bundle() {
     val flush = Input(Bool())
-    val in = Flipped(Decoupled(new InstFetchIO))
-    val out2rob = Decoupled(new IBuffer2ROB)
-    val robin = Flipped(Decoupled(new ROB2iBuf(entities = 8)))
-    val out2decode = Decoupled(new IBuffer2DecodeIO)
+    val icc2buf = Decoupled(Flipped(new Icc2ibuf))
+    val ibuf2rob = Decoupled(new Ibuf2rob)
+    val rob2ibuf = Decoupled(Flipped(new Rob2ibuf))
+    val ibuf2dec = Decoupled(new Ibuf2dec)
   })
 
-  val cur_instBundle = Wire(new IBufferInstInIO)
-  val pnext_instBundle = Wire(new IBufferInstInIO)
+  // Pre-decode buffer与rob连接，传递cur_pc和pnext_pc
+  io.ibuf2rob.bits.cur_pc := io.icc2buf.bits.cur_pc
+  io.ibuf2rob.bits.pnext_pc := io.icc2buf.bits.pnext_pc
 
-  cur_instBundle.pc := io.in.bits.cur_pc
-  cur_instBundle.instruction := io.in.bits.cur_instruction
-  pnext_instBundle.pc := io.in.bits.pnext_pc
-  pnext_instBundle.instruction := io.in.bits.pnext_instruction
+  io.ibuf2dec.bits.cur_pc := io.icc2buf.bits.cur_pc
+  io.ibuf2dec.bits.cur_instruction := io.icc2buf.bits.cur_instruction
+  io.ibuf2dec.bits.cur_entry := io.rob2ibuf.bits.cur_entry
 
-  // To ROB
-  io.out2rob.bits.cur_pc := cur_instBundle.pc
-  io.out2rob.bits.pnext_pc := pnext_instBundle.pc
-
-  // To Decode
-  io.out2decode.bits.cur_pc := cur_instBundle.pc
-  io.out2decode.bits.cur_instruction := cur_instBundle.instruction
-  io.out2decode.bits.cur_entry := io.robin.bits.cur_entry
-  io.out2decode.bits.pnext_instruction := pnext_instBundle.instruction
-  io.out2decode.bits.pnext_pc := pnext_instBundle.pc
-  io.out2decode.bits.pnext_entry := io.robin.bits.pnext_entry
+  io.ibuf2dec.bits.pnext_pc := io.icc2buf.bits.pnext_pc
+  io.ibuf2dec.bits.pnext_instruction := io.icc2buf.bits.pnext_instruction
+  io.ibuf2dec.bits.pnext_entry := io.rob2ibuf.bits.pnext_entry
 }

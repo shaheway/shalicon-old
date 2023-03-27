@@ -1,30 +1,17 @@
 package core.frontend
-import chisel3._
-import chisel3.util.{Cat, Fill, MuxCase, MuxLookup, Decoupled}
-import common.{CSRTypeFunct3, FunctUType, IWtypeFunct3, IWtypeFunct7, InstructionType, ItypeFunct3, ItypeFunct7, RWtypeFunct3, RWtypeFunct7, RtypeFunct3, RtypeFunct7, SrcType}
+import chisel3.{Mux, _}
+import chisel3.util.{Cat, Decoupled, Fill, MuxCase, MuxLookup}
+import common.{CSRTypeFunct3, CtrlSignalIO, DecodeOutIO, FunctUType, IWtypeFunct3, IWtypeFunct7, InstructionType, ItypeFunct3, ItypeFunct7, RWtypeFunct3, RWtypeFunct7, RegWriteSource, RtypeFunct3, RtypeFunct7, SrcType}
 import core.CoreConfig
 import core.backend.funcU.AluopType
 
-class DecoderIO extends Bundle with CoreConfig {
-  val instruction = Input(UInt(instwidth))
-  val src1Type = Output(UInt(2.W))
-  val src2Type = Output(UInt(2.W))
-  val functU = Output(UInt(FunctUType.functUTypeLen))
-  val functOp = Output(UInt(4.W))
-  val reg1Addr = Output(UInt(2.W))
-  val reg2Addr = Output(UInt(2.W))
-  val immediate = Output(UInt(datawidth))
-  val destAddr = Output(UInt(regaddrwidth))
-}
-class Dec2rn extends Bundle with CoreConfig { // decode to rename
-
-}
-class Decoder extends Module {
+class Decoder extends Module with CoreConfig {
   val io = IO(new Bundle() {
-    val interval = new DecoderIO
+    val path = new DecoderIO
     val isBranch = Output(Bool())
   })
-  val instruction = io.interval.instruction
+
+  val instruction = io.path.instruction
   val opcode = instruction(6, 0)
   val rd = instruction(11, 7)
   val funct3 = instruction(14, 12)
@@ -125,25 +112,77 @@ class Decoder extends Module {
     )
   )
 
+  io.path.src1Type := src1Type
+  io.path.src2Type := src2Type
+  io.path.functU := functU
+  io.path.functOp := opType
+  io.path.reg1Addr := Mux(src1Type === SrcType.reg, rs1, 0.U)
+  io.path.reg2Addr := Mux(src2Type === SrcType.reg, rs2, 0.U)
+  io.path.immediate := immediate
+  io.path.destAddr := rd
+
   io.isBranch := (opcode === InstructionType.B || opcode === InstructionType.jal || opcode === InstructionType.jalr)
-
-  io.interval.src1Type := src1Type
-  io.interval.src2Type := src2Type
-  io.interval.functU := functU
-  io.interval.functOp := opType
-  io.interval.reg1Addr := Mux(src1Type === SrcType.reg, rs1, 0.U)
-  io.interval.reg2Addr := Mux(src2Type === SrcType.reg, rs2, 0.U)
-  io.interval.immediate := immediate
-  io.interval.destAddr := rd
-
 }
-class Decode extends Module {
+class DecoderIO extends Bundle with CoreConfig{
+  val instruction = Input(UInt(instwidth))
+  val src1Type = Output(UInt(2.W))
+  val src2Type = Output(UInt(2.W))
+  val functU = Output(UInt(FunctUType.functUTypeLen))
+  val functOp = Output(UInt(4.W))
+  val reg1Addr = Output(UInt(2.W))
+  val reg2Addr = Output(UInt(2.W))
+  val immediate = Output(UInt(datawidth))
+  val destAddr = Output(UInt(regaddrwidth))
+}
+class DecoderPath extends Bundle with CoreConfig {
+  val src1Type = UInt(2.W)
+  val src2Type = UInt(2.W)
+  val functU = UInt(FunctUType.functUTypeLen)
+  val functOp = UInt(4.W)
+  val reg1Addr = UInt(2.W)
+  val reg2Addr = UInt(2.W)
+  val immediate = UInt(datawidth)
+  val destAddr = UInt(regaddrwidth)
+}
+class DecoderPathIO extends Bundle with CoreConfig {
+  val src1Type = Output(UInt(2.W))
+  val src2Type = Output(UInt(2.W))
+  val functU = Output(UInt(FunctUType.functUTypeLen))
+  val functOp = Output(UInt(4.W))
+  val reg1Addr = Output(UInt(2.W))
+  val reg2Addr = Output(UInt(2.W))
+  val immediate = Output(UInt(datawidth))
+  val destAddr = Output(UInt(regaddrwidth))
+}
+class DecoderIOBundle extends Bundle with CoreConfig {
+  val pc = UInt(addrwidth)
+  val path = new DecoderPath
+  val instruction = UInt(instwidth)
+}
+class DecodeOutIO extends Bundle with CoreConfig {
+  val pc = Output(UInt(addrwidth))
+  val path = new DecoderPathIO
+}
+class Decode extends Module with CoreConfig {
   val io = IO(new Bundle() {
-    val ibuf2dec = Decoupled(Flipped(new Ibuf2dec))
+    val in = Flipped(Decoupled(new IBuffer2DecodeIO))
+    val out = Vec(2, Flipped(Decoupled(new DecodeOutIO)))
   })
-
   val decoder0 = Module(new Decoder)
   val decoder1 = Module(new Decoder)
+  val decoder0IO = Wire(new DecoderIOBundle)
+  decoder0IO.pc := io.in.bits.cur_pc
+  decoder0IO.instruction := io.in.bits.cur_instruction
 
+  val decoder1IO = Wire(new DecoderIOBundle)
+  decoder1IO.pc := io.in.bits.pnext_pc
+  decoder1IO.instruction := io.in.bits.pnext_instruction
 
+  decoder0.io.path <> decoder0IO
+  decoder1.io.path <> decoder1IO
+
+  io.out(0).bits.pc := decoder0IO.pc
+  io.out(0).bits.path <> decoder0IO.path
+  io.out(1).bits.pc := decoder1IO.pc
+  io.out(1).bits.path <> decoder1IO.path
 }
