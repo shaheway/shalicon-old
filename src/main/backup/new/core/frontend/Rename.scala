@@ -32,7 +32,7 @@ class Rename extends Module with CoreConfig {
       free_list(i) := false.B
       busy_table(i) := false.B
     }
-    for (i <- 33 until 63){
+    for (i <- 33 until 64){
       free_list(i) := true.B
       busy_table(i) := false.B
     }

@@ -5,8 +5,7 @@ import common.{CSRTypeFunct3, FunctUType, IWtypeFunct3, IWtypeFunct7, Instructio
 import core.CoreConfig
 import core.backend.funcU.AluopType
 
-class DecoderIO extends Bundle with CoreConfig {
-  val instruction = Input(UInt(instwidth))
+class DecoderData extends Bundle with CoreConfig {
   val src1Type = Output(UInt(2.W))
   val src2Type = Output(UInt(2.W))
   val functU = Output(UInt(FunctUType.functUTypeLen))
@@ -15,9 +14,16 @@ class DecoderIO extends Bundle with CoreConfig {
   val reg2Addr = Output(UInt(2.W))
   val immediate = Output(UInt(datawidth))
   val destAddr = Output(UInt(regaddrwidth))
+  val regwrite = Output(Bool())
 }
-class Dec2rn extends Bundle with CoreConfig { // decode to rename
-
+class DecoderIO extends Bundle with CoreConfig {
+  val instruction = Input(UInt(instwidth))
+  val data = new DecoderData
+}
+class Dec2rname extends Bundle with CoreConfig { // decode to rename
+  val entry = Output(UInt(robwidth))
+  val pc = Output(UInt(addrwidth))
+  val data = new DecoderData
 }
 class Decoder extends Module {
   val io = IO(new Bundle() {
@@ -75,6 +81,12 @@ class Decoder extends Module {
     InstructionType.E -> FunctUType.csru
   ))
 
+  val regWriteFlag = MuxLookup(opcode, false.B, IndexedSeq(
+    InstructionType.R -> true.B,
+    InstructionType.RW -> true.B,
+    InstructionType.L -> true.B
+  ))
+
   val opType = MuxLookup(
     opcode,
     AluopType.nop,
@@ -127,23 +139,32 @@ class Decoder extends Module {
 
   io.isBranch := (opcode === InstructionType.B || opcode === InstructionType.jal || opcode === InstructionType.jalr)
 
-  io.interval.src1Type := src1Type
-  io.interval.src2Type := src2Type
-  io.interval.functU := functU
-  io.interval.functOp := opType
-  io.interval.reg1Addr := Mux(src1Type === SrcType.reg, rs1, 0.U)
-  io.interval.reg2Addr := Mux(src2Type === SrcType.reg, rs2, 0.U)
-  io.interval.immediate := immediate
-  io.interval.destAddr := rd
-
+  io.interval.data.src1Type := src1Type
+  io.interval.data.src2Type := src2Type
+  io.interval.data.functU := functU
+  io.interval.data.functOp := opType
+  io.interval.data.reg1Addr := Mux(src1Type === SrcType.reg, rs1, 0.U)
+  io.interval.data.reg2Addr := Mux(src2Type === SrcType.reg, rs2, 0.U)
+  io.interval.data.immediate := immediate
+  io.interval.data.destAddr := rd
+  io.interval.data.regwrite := regWriteFlag
 }
 class Decode extends Module {
   val io = IO(new Bundle() {
     val ibuf2dec = Decoupled(Flipped(new Ibuf2dec))
+    val dec2rname = Decoupled(Vec(2, new Dec2rname))
   })
 
   val decoder0 = Module(new Decoder)
   val decoder1 = Module(new Decoder)
 
+  decoder1.io.interval.instruction := io.ibuf2dec.bits.pnext_instruction
+  io.dec2rname.bits(1).data <> decoder1.io.interval.data
+  io.dec2rname.bits(1).pc := io.ibuf2dec.bits.pnext_pc
+  io.dec2rname.bits(1).entry := io.ibuf2dec.bits.pnext_entry
 
+  decoder0.io.interval.instruction := io.ibuf2dec.bits.cur_instruction
+  io.dec2rname.bits(0).data <> decoder0.io.interval.data
+  io.dec2rname.bits(0).pc := io.ibuf2dec.bits.cur_pc
+  io.dec2rname.bits(0).entry := io.ibuf2dec.bits.cur_entry
 }
