@@ -11,4 +11,7 @@ class Core {
 
 }
 
+class CoreModule extends Module{
+
+}
 

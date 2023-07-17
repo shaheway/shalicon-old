@@ -1,11 +1,14 @@
 package common
 import chisel3._
+import os.CommandResult
 
 trait CoreConfig {
-  val addrWidth = 64.W
-  val dataWidth = 64.W
-  val instWidth = 32.W
-  val dataLength = 64
-  val instLength = 32
-  val fetchCount = 2
+  val memaddr_width = 64.W
+  val xlen = 64.W
+  val regw = 5.W
+  val ilen = 32.W
 }
+
+abstract class MilkyModule extends Module with CoreConfig
+
+abstract class MilkyBundle extends Bundle with CoreConfig

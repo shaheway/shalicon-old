@@ -1,18 +1,20 @@
 package core.frontend
 import chisel3._
 import chisel3.util._
-import common.CoreConfig
-
+import common.{CoreConfig, ShaBundle, ShaModule}
 class FetchBundle extends Bundle with CoreConfig {
-  val pc = UInt(addrWidth)
-  val instVec = Vec(fetchCount, UInt(instWidth))
-  val mask = Bits(fetchCount.W) // 用于指示Vec中哪一个是有效的指令
-  val predResp = new BranchPredictionResp
+  val pc = Output(UInt(addrWidth))
+  val instVec = Input(Vec(fetchCount, UInt(instWidth)))
+  val mask = Input(Bits(fetchCount.W)) // 用于指示Vec中哪一个是有效的指令
   val predResult = Vec(fetchCount, new BranchPredictionResult)
-  val exceptFetch = Bool()
-  val reFetch = Bool()
 }
 
+class FetchContent extends ShaBundle {
+  val pc = Vec(fetchCount, UInt(addrWidth))
+  val instVec = Vec(fetchCount, UInt(instWidth))
+  val mask = Bits(fetchCount.W)
+  val predResult = Vec(fetchCount, Bool())
+}
 class FrontendIO extends Bundle with CoreConfig {
   val req = Decoupled(new Bundle() {
     val pc = Output(UInt(addrWidth))
@@ -21,30 +23,31 @@ class FrontendIO extends Bundle with CoreConfig {
   val resp = Decoupled(Flipped(new Bundle() {
     val pc = Input(UInt(addrWidth))
     val exceptFetch = Input(Bool())
-    val reFetch = Input(Bool())
     val data = Input(UInt(instWidth)) // todo: size of data
     val mask = Input(UInt(fetchCount.W))
   }))
-  /* todo: btb
-  val btb = Decoupled(new Bundle() {
-    val pc = Output(UInt(addrWidth))
-    val branchPC = Output(UInt(addrWidth))
-    val target = Output(UInt(addrWidth))
-    val 
-  })
-   */
-  val bhtUpdate = Output(UInt(6.W))
-}
-
-class BHTUpdate extends Bundle {
-
 }
 
 class BP2Pred extends Bundle with CoreConfig {
   val mask = Output(UInt(fetchCount.W))
 }
 
-class FetchUnit(fetchCount: Int, fetchBufferSize: Int = 4) extends Module with CoreConfig {
+class FetchUnit(fetchBufferSize: Int = 4) extends ShaModule {
+  val io = IO(new Bundle() {
+    val imem = new FrontendIO //todo: FrontendIO
+    val clear_buffer = Input(Bool())
+    val flush = Input(Bool())
+    val stalled = Output(Bool())
+  })
+
+  val fetch_content = Wire(new FetchContent)
+  val fetchBuffer = Module(new Queue(gen = new FetchContent, entries = fetchBufferSize, pipe = false, flow = true))
+
+  fetchBuffer.io.enq.valid := io.imem.resp.valid && io.clear_buffer
+  fetchBuffer.io.enq.bits := fetch_content
+
+}
+class FetchUnit2(fetchCount: Int, fetchBufferSize: Int = 4) extends Module with CoreConfig {
   val io = IO(new Bundle() {
     val imem = new FrontendIO // todo: FrontendIO
     val branchU = new BranchPredictionResp().asInput // todo: wtf?
