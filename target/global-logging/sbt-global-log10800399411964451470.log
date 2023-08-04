@@ -1,0 +1,50 @@
+[debug] > Exec(early(addDefaultCommands), None, None)
+[debug] > Exec(addDefaultCommands, None, None)
+[debug] > Exec(early(initialize), None, None)
+[debug] > Exec(initialize, None, None)
+[debug] > Exec(boot, None, None)
+[debug] > Exec(writeSbtVersion, None, None)
+[debug] > Exec(reload, None, None)
+[debug] > Exec(sbtStashOnFailure, None, None)
+[debug] > Exec(onFailure loadFailed, None, None)
+[debug] > Exec(loadp, None, None)
+[info] welcome to sbt 1.6.2 (Amazon.com Inc. Java 20)
+[debug] Load.defaultLoad until apply took 471.3211ms
+[debug]           Load.loadUnit: plugins took 52.3205ms
+[debug]           Load.loadUnit: defsScala took 0.1033ms
+[debug] [Loading] Scanning directory C:\Users\luoab\Documents\GitHub\shalicon\project
+[debug] [Loading] Found non-root projects 
+[debug] [Loading] Done in C:\Users\luoab\Documents\GitHub\shalicon\project, returning: ()
+[debug] deducing auto plugins based on known facts Set(Atom(sbt.plugins.CorePlugin)) and clauses Clauses(Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.IvyPlugin)))
+[debug] Clause(Atom(sbt.ScriptedPlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.SbtPlugin),Set(Atom(sbt.ScriptedPlugin)))
+[debug] Clause(Atom(sbt.plugins.SemanticdbPlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.JUnitXmlReportPlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.MiniDependencyTreePlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.CorePlugin),Set(Atom(sbt.plugins.IvyPlugin)))
+[debug] Clause(Atom(sbt.plugins.IvyPlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.SemanticdbPlugin)))
+[debug] Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.JUnitXmlReportPlugin)))
+[debug] Clause(Atom(sbt.plugins.CorePlugin),Set(Atom(sbt.plugins.Giter8TemplatePlugin)))
+[debug] Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.MiniDependencyTreePlugin))))
+[debug]   :: deduced result: Matched(sbt.plugins.CorePlugin,sbt.plugins.Giter8TemplatePlugin,sbt.plugins.IvyPlugin,sbt.plugins.JvmPlugin,sbt.plugins.MiniDependencyTreePlugin,sbt.plugins.JUnitXmlReportPlugin,sbt.plugins.SemanticdbPlugin)
+[debug] Plugins.deducer#function took 9.8232 ms
+[debug]               Load.resolveProject(shalicon-build) took 23.9427ms
+[debug]             Load.loadTransitive: finalizeProject(Project(id shalicon-build, base: C:\Users\luoab\Documents\GitHub\shalicon\project, plugins: List(<none>))) took 41.4961ms
+[debug] [Loading] Done in C:\Users\luoab\Documents\GitHub\shalicon\project, returning: (shalicon-build)
+[debug]           Load.loadUnit: loadedProjectsRaw took 48.9745ms
+[debug]           Load.loadUnit: cleanEvalClasses took 0.0937ms
+[debug]         Load.loadUnit(file:/C:/Users/luoab/Documents/GitHub/shalicon/project/, ...) took 114.3814ms
+[debug]       Load.apply: load took 213.4787ms
+[debug]       Load.apply: resolveProjects took 2.4098ms
+[debug]       Load.apply: finalTransforms took 35.2309ms
+[debug]       Load.apply: config.delegates took 10.8122ms
+[debug]       Load.apply: Def.make(settings)... took 423.3042ms
+[debug]       Load.apply: structureIndex took 85.3183ms
+[debug]       Load.apply: mkStreams took 4.8028ms
+[info] loading project definition from C:\Users\luoab\Documents\GitHub\shalicon\project
+[debug] Running task... Cancel: Signal, check cycles: false, forcegc: true
+[debug]     Load.loadUnit: plugins took 1394.4645ms
+[debug]     Load.loadUnit: defsScala took 0.0038ms
+[debug] [Loading] Scanning directory C:\Users\luoab\Documents\GitHub\shalicon
+[debug]       Load.loadUnit: mkEval took 2.4825ms

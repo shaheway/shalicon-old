@@ -1,5 +1,6 @@
 package core.frontend
 import chisel3._
+import common.Cache
 
 class MemReq extends Bundle {
   val addr = Input(UInt(32.W))
