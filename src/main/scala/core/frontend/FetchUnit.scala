@@ -5,9 +5,8 @@ import common.MilkyModule
 class PCGenerator extends MilkyModule{
   val io = IO(new Bundle() {
     val bp = Input(Bool())
-    val next_pc = Input(UInt(xlen))
-    val cur_pc = Output(UInt(xlen))
-    val cur_inst = Output(UInt(xlen))
+    val cur_inst = Input(UInt(ilen))
+    val next_pc = Output(UInt(xlen))
   })
 
 /* pc is initialized as 0 when the machine is powered,
@@ -17,4 +16,8 @@ class PCGenerator extends MilkyModule{
   val npc = Mux(io.bp, io.next_pc, pc)
 
   io.cur_pc := pc
+}
+
+class FetchUnit extends MilkyModule {
+
 }
